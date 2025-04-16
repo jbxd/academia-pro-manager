@@ -52,7 +52,7 @@ const Sidebar: React.FC = () => {
       <div className={sidebarClasses}>
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold">Academia Pro</span>
+            <span className="text-xl font-bold">Team Of Monsters</span>
           </div>
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
             <X className="h-5 w-5" />
@@ -88,7 +88,7 @@ const Sidebar: React.FC = () => {
                 <div className="flex items-center space-x-3 p-2 rounded-md w-full">
                   <Avatar>
                     <AvatarImage src={user?.avatar} alt={user?.name} />
-                    <AvatarFallback>{user?.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                    <AvatarFallback>{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div className="flex flex-col text-left">
                     <span className="font-medium">{user?.name}</span>

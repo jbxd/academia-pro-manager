@@ -39,7 +39,7 @@ const StudentDashboard: React.FC = () => {
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold">Olá, {studentData.name}</h1>
         <p className="text-muted-foreground">
-          Bem-vindo à sua área do aluno
+          Bem-vindo à sua área do aluno do Team Of Monsters
         </p>
       </div>
 
