@@ -203,7 +203,6 @@ const Training = () => {
               <CardFooter>
                 <Button 
                   variant="outline" 
-                  className="w-full" 
                   onClick={handleChangeSchedule}
                   className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
                 >
@@ -327,7 +326,6 @@ const Training = () => {
               </CardContent>
               <CardFooter>
                 <Button 
-                  className="w-full" 
                   onClick={handleSaveChanges}
                   className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
                 >
