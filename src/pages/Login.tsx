@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { UserPlus } from "lucide-react";
 
 const Login: React.FC = () => {
   const { login, isLoading } = useAuth();
@@ -16,7 +16,8 @@ const Login: React.FC = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [forgotEmail, setForgotEmail] = useState("");
-  
+  const [isRegisterModalOpen, setIsRegisterModalOpen] = useState(false);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -34,13 +35,18 @@ const Login: React.FC = () => {
     toast.success(`Instruções de recuperação enviadas para ${forgotEmail}`);
     setActiveTab("login");
   };
-  
+
+  const handleRegisterClick = () => {
+    setIsRegisterModalOpen(true);
+    toast.info("Funcionalidade de cadastro em desenvolvimento");
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-black via-red-900 to-black p-4">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="text-3xl font-bold text-primary">Academia Pro</h1>
-          <p className="text-muted-foreground">Sistema de Gerenciamento</p>
+          <h1 className="text-3xl font-bold text-white">Team of Monsters</h1>
+          <p className="text-white/70">Sistema de Gerenciamento</p>
         </div>
         
         <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "login" | "forgot")}>
@@ -53,7 +59,7 @@ const Login: React.FC = () => {
             <Card>
               <CardHeader>
                 <CardTitle>Acesso ao sistema</CardTitle>
-                <CardDescription>
+                <CardDescription className="text-muted-foreground">
                   Digite suas credenciais para entrar no sistema
                 </CardDescription>
               </CardHeader>
@@ -87,8 +93,16 @@ const Login: React.FC = () => {
                   </div>
                 </CardContent>
                 
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                <CardFooter className="flex justify-between items-center">
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={handleRegisterClick}
+                  >
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Cadastro
+                  </Button>
+                  <Button type="submit" className="w-1/2" disabled={isLoading}>
                     {isLoading ? (
                       <>
                         <span className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>

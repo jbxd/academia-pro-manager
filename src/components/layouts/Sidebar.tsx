@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { NavLink } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
@@ -52,7 +51,7 @@ const Sidebar: React.FC = () => {
       <div className={sidebarClasses}>
         <div className="flex items-center justify-between p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-2">
-            <span className="text-xl font-bold">Team Of Monsters</span>
+            <span className="text-xl font-bold">Team of Monsters</span>
           </div>
           <Button variant="ghost" size="icon" onClick={toggleSidebar} className="md:hidden">
             <X className="h-5 w-5" />
@@ -120,7 +119,6 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile sidebar toggle */}
       <Button
         variant="ghost"
         size="icon"
