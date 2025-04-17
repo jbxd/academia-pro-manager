@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import {
   CalendarDays,
   Clock,
@@ -9,7 +9,11 @@ import {
   ArrowRight,
   UserCheck,
   Settings,
-  Plus
+  Plus,
+  Trash2,
+  CalendarClock,
+  History,
+  Save
 } from "lucide-react";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -23,14 +27,15 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { toast } from "sonner";
 
 const Training = () => {
   // Mock data for student training schedule
-  const studentSchedule = [
-    { day: "Segunda", time: "18:00 - 19:30" },
-    { day: "Quarta", time: "18:00 - 19:30" },
-    { day: "Sexta", time: "18:00 - 19:30" },
-  ];
+  const [studentSchedule, setStudentSchedule] = useState([
+    { id: "1", day: "Segunda", time: "18:00 - 19:30" },
+    { id: "2", day: "Quarta", time: "18:00 - 19:30" },
+    { id: "3", day: "Sexta", time: "18:00 - 19:30" },
+  ]);
 
   // Mock data for attendance history
   const attendanceHistory = [
@@ -44,13 +49,13 @@ const Training = () => {
 
   // Mock data for available class slots
   const availableSlots = [
-    { day: "Segunda", time: "06:00 - 07:30", availability: "high" },
-    { day: "Segunda", time: "08:00 - 09:30", availability: "high" },
-    { day: "Segunda", time: "18:00 - 19:30", availability: "low" },
-    { day: "Terça", time: "07:00 - 08:30", availability: "medium" },
-    { day: "Terça", time: "18:00 - 19:30", availability: "low" },
-    { day: "Quarta", time: "06:00 - 07:30", availability: "high" },
-    { day: "Quarta", time: "18:00 - 19:30", availability: "low" },
+    { id: "4", day: "Segunda", time: "06:00 - 07:30", availability: "high" },
+    { id: "5", day: "Segunda", time: "08:00 - 09:30", availability: "high" },
+    { id: "6", day: "Segunda", time: "18:00 - 19:30", availability: "low" },
+    { id: "7", day: "Terça", time: "07:00 - 08:30", availability: "medium" },
+    { id: "8", day: "Terça", time: "18:00 - 19:30", availability: "low" },
+    { id: "9", day: "Quarta", time: "06:00 - 07:30", availability: "high" },
+    { id: "10", day: "Quarta", time: "18:00 - 19:30", availability: "low" },
   ];
 
   const getStatusBadge = (status: string) => {
@@ -75,6 +80,37 @@ const Training = () => {
       default:
         return <Badge>Desconhecido</Badge>;
     }
+  };
+
+  const handleConfirmPresence = () => {
+    toast.success("Presença confirmada com sucesso!");
+  };
+
+  const handleAddSchedule = (slot: { id: string, day: string, time: string }) => {
+    const exists = studentSchedule.some(schedule => schedule.id === slot.id);
+    if (exists) {
+      toast.error("Horário já adicionado!");
+      return;
+    }
+    setStudentSchedule(prev => [...prev, { id: slot.id, day: slot.day, time: slot.time }]);
+    toast.success("Horário adicionado com sucesso!");
+  };
+
+  const handleRemoveSchedule = (id: string) => {
+    setStudentSchedule(prev => prev.filter(schedule => schedule.id !== id));
+    toast.success("Horário removido com sucesso!");
+  };
+
+  const handleSaveChanges = () => {
+    toast.success("Alterações salvas com sucesso!");
+  };
+
+  const handleChangeSchedule = () => {
+    toast.success("Função alteração de horário ativada!");
+  };
+
+  const handleViewFullHistory = () => {
+    toast.success("Visualizando histórico completo...");
   };
 
   return (
@@ -114,7 +150,8 @@ const Training = () => {
                   <p className="text-muted-foreground">Duração: 1h30min</p>
                 </div>
               </div>
-              <Button size="lg">
+              <Button size="lg" onClick={handleConfirmPresence}>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
                 Confirmar Presença
               </Button>
             </div>
@@ -138,8 +175,8 @@ const Training = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {studentSchedule.map((schedule, index) => (
-                    <div key={index} className="flex items-center justify-between border-b pb-4 last:border-0">
+                  {studentSchedule.map((schedule) => (
+                    <div key={schedule.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                       <div className="flex items-center">
                         <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
                           <Calendar className="h-6 w-6 text-primary" />
@@ -155,9 +192,9 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
-                  <Settings className="mr-2 h-4 w-4" />
-                  Gerenciar Horários
+                <Button variant="outline" className="w-full" onClick={handleChangeSchedule}>
+                  <CalendarClock className="mr-2 h-4 w-4" />
+                  Alterar Horários
                 </Button>
               </CardFooter>
             </Card>
@@ -202,8 +239,8 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full">
-                  <ArrowRight className="mr-2 h-4 w-4" />
+                <Button variant="outline" className="w-full" onClick={handleViewFullHistory}>
+                  <History className="mr-2 h-4 w-4" />
                   Ver Histórico Completo
                 </Button>
               </CardFooter>
@@ -222,13 +259,18 @@ const Training = () => {
                 <div className="space-y-4">
                   <p className="font-medium">Horários Atuais</p>
                   <div className="grid gap-2">
-                    {studentSchedule.map((schedule, index) => (
-                      <div key={index} className="flex justify-between items-center border-b pb-2">
+                    {studentSchedule.map((schedule) => (
+                      <div key={schedule.id} className="flex justify-between items-center border-b pb-2">
                         <div className="flex items-center">
                           <CalendarDays className="h-5 w-5 mr-2 text-muted-foreground" />
                           <span>{schedule.day} • {schedule.time}</span>
                         </div>
-                        <Button variant="outline" size="sm">
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => handleRemoveSchedule(schedule.id)}
+                        >
+                          <Trash2 className="h-4 w-4 mr-2" />
                           Remover
                         </Button>
                       </div>
@@ -242,15 +284,18 @@ const Training = () => {
                     </p>
                     
                     <div className="grid gap-2">
-                      {availableSlots.map((slot, index) => (
-                        <div key={index} className="flex justify-between items-center border-b pb-2">
+                      {availableSlots.map((slot) => (
+                        <div key={slot.id} className="flex justify-between items-center border-b pb-2">
                           <div className="flex items-center">
                             <CalendarDays className="h-5 w-5 mr-2 text-muted-foreground" />
                             <span>{slot.day} • {slot.time}</span>
                           </div>
                           <div className="flex items-center space-x-2">
                             {getAvailabilityBadge(slot.availability)}
-                            <Button size="sm">
+                            <Button 
+                              size="sm"
+                              onClick={() => handleAddSchedule(slot)}
+                            >
                               <Plus className="h-4 w-4 mr-2" />
                               Adicionar
                             </Button>
@@ -262,8 +307,8 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full">
-                  <UserCheck className="mr-2 h-4 w-4" />
+                <Button className="w-full" onClick={handleSaveChanges}>
+                  <Save className="mr-2 h-4 w-4" />
                   Salvar Alterações
                 </Button>
               </CardFooter>

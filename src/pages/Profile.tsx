@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
+import { Camera, Save, Lock } from "lucide-react";
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -54,6 +55,12 @@ const Profile: React.FC = () => {
       confirmPassword: "",
     });
   };
+
+  const handleChangePhoto = () => {
+    toast.success("Funcionalidade de alteração de foto ativada!");
+    // Here you would typically open a file dialog
+    // For this example, we'll just show a toast notification
+  };
   
   return (
     <AppLayout>
@@ -76,7 +83,10 @@ const Profile: React.FC = () => {
                 <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback className="text-2xl">{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <Button variant="outline">Alterar foto</Button>
+              <Button variant="outline" onClick={handleChangePhoto}>
+                <Camera className="h-4 w-4 mr-2" />
+                Alterar foto
+              </Button>
             </CardContent>
           </Card>
           
@@ -140,7 +150,10 @@ const Profile: React.FC = () => {
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">Salvar alterações</Button>
+                      <Button type="submit">
+                        <Save className="h-4 w-4 mr-2" />
+                        Salvar alterações
+                      </Button>
                     </div>
                   </form>
                 </TabsContent>
@@ -181,7 +194,10 @@ const Profile: React.FC = () => {
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">Atualizar senha</Button>
+                      <Button type="submit">
+                        <Lock className="h-4 w-4 mr-2" />
+                        Atualizar senha
+                      </Button>
                     </div>
                   </form>
                 </TabsContent>

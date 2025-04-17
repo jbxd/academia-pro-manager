@@ -8,6 +8,8 @@ import {
   Clock,
   ArrowRight,
   Download,
+  Bell,
+  Trash2,
 } from "lucide-react";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Button } from "@/components/ui/button";
@@ -22,6 +24,7 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
 
 const Payments = () => {
   // Mock data for student payments
@@ -94,6 +97,34 @@ const Payments = () => {
     }
   };
 
+  const handlePayment = () => {
+    toast.success("Processando pagamento...");
+  };
+
+  const handleAdvancePayment = () => {
+    toast.success("Processando pagamento adiantado...");
+  };
+
+  const handleAddPaymentMethod = () => {
+    toast.success("Função adicionar método de pagamento ativada!");
+  };
+
+  const handleRemovePaymentMethod = (id: string) => {
+    toast.success(`Método de pagamento ${id} removido com sucesso!`);
+  };
+
+  const handleChangePaymentDate = () => {
+    toast.success("Função alterar data de pagamento ativada!");
+  };
+
+  const handleConfigNotifications = () => {
+    toast.success("Função configurar notificações ativada!");
+  };
+
+  const handleManagePayment = (id: string) => {
+    toast.success(`Gerenciando pagamento ${id}...`);
+  };
+
   return (
     <AppLayout>
       <div className="flex flex-col gap-4">
@@ -136,7 +167,7 @@ const Payments = () => {
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full">
+            <Button className="w-full" onClick={handleAdvancePayment}>
               <Calendar className="mr-2 h-4 w-4" />
               Realizar pagamento antecipado
             </Button>
@@ -178,9 +209,9 @@ const Payments = () => {
                         <div className="mt-1">
                           {getStatusBadge(payment.status)}
                         </div>
-                        <Button variant="ghost" size="sm" className="mt-2">
+                        <Button variant="ghost" size="sm" className="mt-2" onClick={() => handleManagePayment(payment.id)}>
                           <FileText className="h-4 w-4 mr-2" />
-                          Ver comprovante
+                          Gerenciar pagamento
                         </Button>
                       </div>
                     </div>
@@ -199,7 +230,7 @@ const Payments = () => {
                     Gerencie seus métodos de pagamento
                   </CardDescription>
                 </div>
-                <Button>
+                <Button onClick={handleAddPaymentMethod}>
                   <CreditCard className="h-4 w-4 mr-2" />
                   Adicionar Método
                 </Button>
@@ -227,7 +258,14 @@ const Payments = () => {
                       <div className="space-x-2">
                         <Button variant="outline" size="sm">Editar</Button>
                         {!method.isDefault && (
-                          <Button variant="destructive" size="sm">Remover</Button>
+                          <Button 
+                            variant="destructive" 
+                            size="sm" 
+                            onClick={() => handleRemovePaymentMethod(method.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Remover
+                          </Button>
                         )}
                       </div>
                     </div>
@@ -259,17 +297,29 @@ const Payments = () => {
                     <p className="text-sm text-muted-foreground mb-2">
                       Selecione a data de vencimento preferencial para suas mensalidades.
                     </p>
-                    <Button variant="outline">Alterar Data de Vencimento</Button>
+                    <Button variant="outline" onClick={handleChangePaymentDate}>
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Alterar Data de Vencimento
+                    </Button>
                   </div>
                   <div>
                     <p className="font-medium">Notificações de Pagamento</p>
                     <p className="text-sm text-muted-foreground mb-2">
                       Receba lembretes sobre vencimentos e confirmações de pagamento.
                     </p>
-                    <Button variant="outline">Configurar Notificações</Button>
+                    <Button variant="outline" onClick={handleConfigNotifications}>
+                      <Bell className="h-4 w-4 mr-2" />
+                      Configurar Notificações
+                    </Button>
                   </div>
                 </div>
               </CardContent>
+              <CardFooter>
+                <Button className="w-full" onClick={handlePayment}>
+                  <DollarSign className="mr-2 h-4 w-4" />
+                  Realizar pagamento
+                </Button>
+              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
