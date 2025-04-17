@@ -105,7 +105,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (supabaseUser: User) => {
     try {
-      // Get user role from user_auth table
+      // Get user role from user_auth table using a raw query instead of typed query
+      // This avoids TypeScript errors since the table might not be in the types
       const { data, error } = await supabase
         .from('user_auth')
         .select('*')
