@@ -175,7 +175,6 @@ const Payments = () => {
           </CardContent>
           <CardFooter>
             <Button 
-              className="w-full" 
               onClick={handleAdvancePayment}
               className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
             >
@@ -327,7 +326,6 @@ const Payments = () => {
               </CardContent>
               <CardFooter>
                 <Button 
-                  className="w-full" 
                   onClick={handlePayment}
                   className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
                 >

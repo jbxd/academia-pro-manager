@@ -112,7 +112,7 @@ const Students = () => {
           <div className="flex gap-2 w-full md:w-auto">
             <div className="relative flex-grow">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input placeholder="Buscar aluno..." className="pl-8" />
+              <Input placeholder="Buscar aluno..." className="pl-8 text-gray-700" />
             </div>
             <Button variant="outline">
               <Filter className="h-4 w-4 mr-2" />
@@ -157,7 +157,9 @@ const Students = () => {
                     <Button className="flex-1" variant="outline">
                       Detalhes
                     </Button>
-                    <Button className="flex-1" className={isAdmin ? "flex-1 bg-custom-red hover:bg-custom-red/80" : "flex-1"}>
+                    <Button 
+                      className={isAdmin ? "flex-1 bg-custom-red hover:bg-custom-red/80" : "flex-1"}
+                    >
                       Editar
                     </Button>
                   </div>
