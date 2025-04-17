@@ -25,8 +25,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Payments = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const isStudent = user?.role === "student";
+  const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
+  
   // Mock data for student payments
   const currentMembership = {
     plan: "Plano Trimestral",
@@ -98,11 +105,11 @@ const Payments = () => {
   };
 
   const handlePayment = () => {
-    toast.success("Processando pagamento...");
+    navigate("/checkout");
   };
 
   const handleAdvancePayment = () => {
-    toast.success("Processando pagamento adiantado...");
+    navigate("/checkout");
   };
 
   const handleAddPaymentMethod = () => {
@@ -129,45 +136,49 @@ const Payments = () => {
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Pagamentos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Pagamentos</h1>
+          <p className={isStudent ? "text-gray-200" : "text-muted-foreground"}>
             Gerencie seus pagamentos e métodos de pagamento
           </p>
         </div>
 
-        <Card>
+        <Card className={cardClasses}>
           <CardHeader className="pb-2">
             <CardTitle>Status da Mensalidade</CardTitle>
-            <CardDescription>
+            <CardDescription className={isStudent ? "text-gray-300" : ""}>
               {currentMembership.plan}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Período:</span>
+              <span className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Período:</span>
               <span className="font-medium">{currentMembership.startDate} até {currentMembership.endDate}</span>
             </div>
 
             <div className="space-y-1">
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Dias restantes:</span>
+                <span className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Dias restantes:</span>
                 <span className="font-medium">{currentMembership.daysLeft} dias</span>
               </div>
               <Progress value={progress} className="h-2" />
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Próximo pagamento:</span>
+              <span className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Próximo pagamento:</span>
               <span className="font-medium">{currentMembership.nextPayment}</span>
             </div>
 
             <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Valor:</span>
+              <span className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Valor:</span>
               <span className="font-medium">{currentMembership.amount}</span>
             </div>
           </CardContent>
           <CardFooter>
-            <Button className="w-full" onClick={handleAdvancePayment}>
+            <Button 
+              className="w-full" 
+              onClick={handleAdvancePayment}
+              className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
+            >
               <Calendar className="mr-2 h-4 w-4" />
               Realizar pagamento antecipado
             </Button>
@@ -182,11 +193,11 @@ const Payments = () => {
           </TabsList>
 
           <TabsContent value="history">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Histórico de Pagamentos</CardTitle>
-                  <CardDescription>
+                  <CardDescription className={isStudent ? "text-gray-300" : ""}>
                     Seus pagamentos anteriores
                   </CardDescription>
                 </div>
@@ -201,8 +212,8 @@ const Payments = () => {
                     <div key={payment.id} className="flex justify-between items-center border-b pb-4">
                       <div>
                         <p className="font-medium">{payment.description}</p>
-                        <p className="text-sm text-muted-foreground">{payment.date}</p>
-                        <p className="text-sm text-muted-foreground">Via {payment.method}</p>
+                        <p className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>{payment.date}</p>
+                        <p className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Via {payment.method}</p>
                       </div>
                       <div className="text-right">
                         <p className="font-medium">{payment.amount}</p>
@@ -222,15 +233,15 @@ const Payments = () => {
           </TabsContent>
 
           <TabsContent value="methods">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Métodos de Pagamento</CardTitle>
-                  <CardDescription>
+                  <CardDescription className={isStudent ? "text-gray-300" : ""}>
                     Gerencie seus métodos de pagamento
                   </CardDescription>
                 </div>
-                <Button onClick={handleAddPaymentMethod}>
+                <Button className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""} onClick={handleAddPaymentMethod}>
                   <CreditCard className="h-4 w-4 mr-2" />
                   Adicionar Método
                 </Button>
@@ -249,7 +260,7 @@ const Payments = () => {
                         </div>
                         <div>
                           <p className="font-medium">{method.name}</p>
-                          <p className="text-sm text-muted-foreground">{method.details}</p>
+                          <p className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>{method.details}</p>
                           {method.isDefault && (
                             <Badge variant="secondary" className="mt-1">Padrão</Badge>
                           )}
@@ -276,10 +287,10 @@ const Payments = () => {
           </TabsContent>
 
           <TabsContent value="settings">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Preferências de Pagamento</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Configure suas preferências para futuros pagamentos
                 </CardDescription>
               </CardHeader>
@@ -287,14 +298,14 @@ const Payments = () => {
                 <div className="space-y-4">
                   <div className="border-b pb-4">
                     <p className="font-medium">Pagamento Automático</p>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className={isStudent ? "text-sm text-gray-300 mb-2" : "text-sm text-muted-foreground mb-2"}>
                       Permitir que o sistema debite automaticamente o valor da mensalidade no vencimento.
                     </p>
                     <Button variant="outline">Ativar Pagamento Automático</Button>
                   </div>
                   <div className="border-b pb-4">
                     <p className="font-medium">Data de Vencimento</p>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className={isStudent ? "text-sm text-gray-300 mb-2" : "text-sm text-muted-foreground mb-2"}>
                       Selecione a data de vencimento preferencial para suas mensalidades.
                     </p>
                     <Button variant="outline" onClick={handleChangePaymentDate}>
@@ -304,7 +315,7 @@ const Payments = () => {
                   </div>
                   <div>
                     <p className="font-medium">Notificações de Pagamento</p>
-                    <p className="text-sm text-muted-foreground mb-2">
+                    <p className={isStudent ? "text-sm text-gray-300 mb-2" : "text-sm text-muted-foreground mb-2"}>
                       Receba lembretes sobre vencimentos e confirmações de pagamento.
                     </p>
                     <Button variant="outline" onClick={handleConfigNotifications}>
@@ -315,7 +326,11 @@ const Payments = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" onClick={handlePayment}>
+                <Button 
+                  className="w-full" 
+                  onClick={handlePayment}
+                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
+                >
                   <DollarSign className="mr-2 h-4 w-4" />
                   Realizar pagamento
                 </Button>

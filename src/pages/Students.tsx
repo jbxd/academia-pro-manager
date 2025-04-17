@@ -19,8 +19,13 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Students = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
+  
   // Mock data for students
   const students = [
     {
@@ -97,8 +102,8 @@ const Students = () => {
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Gestão de Alunos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Gestão de Alunos</h1>
+          <p className="text-gray-200">
             Gerencie os alunos do Team Of Monsters
           </p>
         </div>
@@ -122,37 +127,39 @@ const Students = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {students.map((student) => (
-            <Card key={student.id}>
+            <Card key={student.id} className={cardClasses}>
               <CardHeader className="pb-2">
                 <div className="flex justify-between items-center">
                   <CardTitle className="text-lg">{student.name}</CardTitle>
                   {getStatusBadge(student.status)}
                 </div>
-                <CardDescription>{student.email}</CardDescription>
+                <CardDescription className={isAdmin ? "text-gray-300" : ""}>{student.email}</CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Telefone:</span>
+                    <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Telefone:</span>
                     <span>{student.phone}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Plano:</span>
+                    <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Plano:</span>
                     <span>{student.plan}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-sm text-muted-foreground">Desde:</span>
+                    <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Desde:</span>
                     <span>{student.joinDate}</span>
                   </div>
                   <div className="flex justify-between items-center pt-2">
-                    <span className="text-sm text-muted-foreground">Pagamento:</span>
+                    <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Pagamento:</span>
                     {getPaymentStatusBadge(student.paymentStatus)}
                   </div>
                   <div className="pt-4 flex gap-2">
                     <Button className="flex-1" variant="outline">
                       Detalhes
                     </Button>
-                    <Button className="flex-1">Editar</Button>
+                    <Button className="flex-1" className={isAdmin ? "flex-1 bg-custom-red hover:bg-custom-red/80" : "flex-1"}>
+                      Editar
+                    </Button>
                   </div>
                 </div>
               </CardContent>

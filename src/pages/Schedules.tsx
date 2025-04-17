@@ -16,8 +16,13 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Schedules = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+  const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
+  
   // Mock data for class schedules
   const schedules = [
     { 
@@ -95,48 +100,48 @@ const Schedules = () => {
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Gestão de Horários</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Gestão de Horários</h1>
+          <p className="text-gray-200">
             Gerencie os horários e turmas do Team Of Monsters
           </p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <Card>
+          <Card className={cardClasses}>
             <CardContent className="p-6 flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">Turmas Ativas</p>
+                <p className={isAdmin ? "text-gray-300 text-sm" : "text-muted-foreground text-sm"}>Turmas Ativas</p>
                 <p className="text-3xl font-bold">12</p>
                 <p className="text-xs">5 modalidades</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Calendar className="h-6 w-6 text-primary" />
+              <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center">
+                <Calendar className="h-6 w-6 text-custom-red" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className={cardClasses}>
             <CardContent className="p-6 flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">Instrutores</p>
+                <p className={isAdmin ? "text-gray-300 text-sm" : "text-muted-foreground text-sm"}>Instrutores</p>
                 <p className="text-3xl font-bold">8</p>
                 <p className="text-xs">Disponíveis</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-blue-500" />
+              <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center">
+                <Users className="h-6 w-6 text-custom-red" />
               </div>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className={cardClasses}>
             <CardContent className="p-6 flex items-center justify-between">
               <div>
-                <p className="text-muted-foreground text-sm">Horário Pico</p>
+                <p className={isAdmin ? "text-gray-300 text-sm" : "text-muted-foreground text-sm"}>Horário Pico</p>
                 <p className="text-3xl font-bold">18:00</p>
                 <p className="text-xs">95% ocupação</p>
               </div>
-              <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <Clock className="h-6 w-6 text-amber-500" />
+              <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center">
+                <Clock className="h-6 w-6 text-custom-red" />
               </div>
             </CardContent>
           </Card>
@@ -161,7 +166,7 @@ const Schedules = () => {
                   Filtrar
                 </Button>
               </div>
-              <Button>
+              <Button className={isAdmin ? "bg-custom-red hover:bg-custom-red/80" : ""}>
                 <Plus className="h-4 w-4 mr-2" />
                 Nova Turma
               </Button>
@@ -169,31 +174,31 @@ const Schedules = () => {
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
               {schedules.map((schedule) => (
-                <Card key={schedule.id}>
+                <Card key={schedule.id} className={cardClasses}>
                   <CardHeader className="pb-2">
                     <div className="flex justify-between items-center">
                       <CardTitle>{schedule.name}</CardTitle>
                       {getCapacityBadge(schedule.current, schedule.capacity)}
                     </div>
-                    <CardDescription>Instrutor: {schedule.instructor}</CardDescription>
+                    <CardDescription className={isAdmin ? "text-gray-300" : ""}>Instrutor: {schedule.instructor}</CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-2">
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Dias:</span>
+                        <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Dias:</span>
                         <span>{schedule.days.join(", ")}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Horário:</span>
+                        <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Horário:</span>
                         <span>{schedule.time}</span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-sm text-muted-foreground">Ocupação:</span>
+                        <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>Ocupação:</span>
                         <span>{schedule.current} / {schedule.capacity}</span>
                       </div>
                       <div className="h-2 w-full bg-muted overflow-hidden rounded-full mt-2">
                         <div
-                          className="h-full bg-primary"
+                          className="h-full bg-custom-red"
                           style={{ width: `${(schedule.current / schedule.capacity) * 100}%` }}
                         />
                       </div>
@@ -215,10 +220,10 @@ const Schedules = () => {
           </TabsContent>
 
           <TabsContent value="calendar">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Calendário de Aulas</CardTitle>
-                <CardDescription>
+                <CardDescription className={isAdmin ? "text-gray-300" : ""}>
                   Visão geral de todas as aulas agendadas
                 </CardDescription>
               </CardHeader>
@@ -232,10 +237,10 @@ const Schedules = () => {
           </TabsContent>
 
           <TabsContent value="analytics">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Horários Mais Procurados</CardTitle>
-                <CardDescription>
+                <CardDescription className={isAdmin ? "text-gray-300" : ""}>
                   Horários com maior ocupação
                 </CardDescription>
               </CardHeader>
@@ -250,10 +255,10 @@ const Schedules = () => {
                         <p className="font-medium">{time.time}</p>
                         <span className="text-sm font-medium">{time.occupation}%</span>
                       </div>
-                      <div className="text-sm text-muted-foreground">{time.days}</div>
+                      <div className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>{time.days}</div>
                       <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
                         <div
-                          className="h-full bg-primary"
+                          className="h-full bg-custom-red"
                           style={{ width: `${time.occupation}%` }}
                         />
                       </div>
@@ -263,10 +268,10 @@ const Schedules = () => {
               </CardContent>
             </Card>
 
-            <Card className="mt-4">
+            <Card className={`mt-4 ${cardClasses}`}>
               <CardHeader>
                 <CardTitle>Distribuição de Alunos</CardTitle>
-                <CardDescription>
+                <CardDescription className={isAdmin ? "text-gray-300" : ""}>
                   Alunos por dia da semana e horário
                 </CardDescription>
               </CardHeader>

@@ -10,7 +10,7 @@ interface AppLayoutProps {
 }
 
 const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, user } = useAuth();
   const navigate = useNavigate();
 
   // Redirect to login if not authenticated
@@ -33,11 +33,18 @@ const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     return null; // Will redirect to login
   }
 
+  // Apply different styling based on user role
+  const backgroundClass = user?.role === "student" 
+    ? "bg-gradient-black-red min-h-screen -m-6 p-6"
+    : "bg-gradient-black-red min-h-screen -m-6 p-6";
+
   return (
     <div className="flex h-screen w-full overflow-hidden">
       <Sidebar />
-      <main className="flex-1 overflow-auto p-4 md:p-6">
-        {children}
+      <main className="flex-1 overflow-auto">
+        <div className={backgroundClass}>
+          {children}
+        </div>
       </main>
       <Toaster position="bottom-right" />
     </div>

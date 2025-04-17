@@ -62,38 +62,41 @@ const Profile: React.FC = () => {
     // For this example, we'll just show a toast notification
   };
   
+  const isStudent = user?.role === "student";
+  const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
+  
   return (
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Perfil</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Perfil</h1>
+          <p className={isStudent ? "text-gray-200" : "text-muted-foreground"}>
             Gerencie suas informações pessoais
           </p>
         </div>
         
         <div className="grid gap-4 md:grid-cols-3">
-          <Card className="md:col-span-1">
+          <Card className={`md:col-span-1 ${cardClasses}`}>
             <CardHeader>
               <CardTitle>Foto de Perfil</CardTitle>
-              <CardDescription>Esta é sua imagem atual</CardDescription>
+              <CardDescription className={isStudent ? "text-gray-300" : ""}>Esta é sua imagem atual</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
               <Avatar className="h-32 w-32">
                 <AvatarImage src={user?.avatar} alt={user?.name} />
                 <AvatarFallback className="text-2xl">{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
               </Avatar>
-              <Button variant="outline" onClick={handleChangePhoto}>
+              <Button variant="outline" onClick={handleChangePhoto} className={isStudent ? "bg-custom-red text-white hover:bg-custom-red/80 border-none" : ""}>
                 <Camera className="h-4 w-4 mr-2" />
                 Alterar foto
               </Button>
             </CardContent>
           </Card>
           
-          <Card className="md:col-span-2">
+          <Card className={`md:col-span-2 ${cardClasses}`}>
             <CardHeader>
               <CardTitle>Informações Pessoais</CardTitle>
-              <CardDescription>Atualize seus dados de contato</CardDescription>
+              <CardDescription className={isStudent ? "text-gray-300" : ""}>Atualize seus dados de contato</CardDescription>
             </CardHeader>
             <CardContent>
               <Tabs defaultValue="profile" className="w-full">
@@ -150,7 +153,7 @@ const Profile: React.FC = () => {
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">
+                      <Button type="submit" className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}>
                         <Save className="h-4 w-4 mr-2" />
                         Salvar alterações
                       </Button>
@@ -194,7 +197,7 @@ const Profile: React.FC = () => {
                     </div>
                     
                     <div className="flex justify-end">
-                      <Button type="submit">
+                      <Button type="submit" className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}>
                         <Lock className="h-4 w-4 mr-2" />
                         Atualizar senha
                       </Button>

@@ -24,13 +24,15 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const Settings = () => {
   const { user } = useAuth();
+  const isStudent = user?.role === "student";
+  const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
 
   return (
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Configurações</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Configurações</h1>
+          <p className={isStudent ? "text-gray-200" : "text-muted-foreground"}>
             Gerencie as configurações do Team Of Monsters
           </p>
         </div>
@@ -60,16 +62,16 @@ const Settings = () => {
           </TabsList>
 
           <TabsContent value="profile">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Configurações de Perfil</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Gerencie suas informações pessoais
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                     Aqui você pode atualizar suas informações pessoais, foto de perfil e outras configurações relacionadas ao seu perfil.
                   </p>
                 </div>
@@ -80,16 +82,16 @@ const Settings = () => {
           {user?.role === "admin" && (
             <>
               <TabsContent value="general">
-                <Card>
+                <Card className={cardClasses}>
                   <CardHeader>
                     <CardTitle>Configurações Gerais</CardTitle>
-                    <CardDescription>
+                    <CardDescription className={isStudent ? "text-gray-300" : ""}>
                       Configurações gerais do sistema
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <p className="text-muted-foreground">
+                      <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                         Aqui você pode configurar definições gerais do sistema, como idioma, fuso horário e outras preferências.
                       </p>
                     </div>
@@ -98,16 +100,16 @@ const Settings = () => {
               </TabsContent>
 
               <TabsContent value="company">
-                <Card>
+                <Card className={cardClasses}>
                   <CardHeader>
                     <CardTitle>Configurações da Empresa</CardTitle>
-                    <CardDescription>
+                    <CardDescription className={isStudent ? "text-gray-300" : ""}>
                       Informações e configurações da academia
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <p className="text-muted-foreground">
+                      <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                         Aqui você pode atualizar as informações da academia, como nome, endereço, logo e informações de contato.
                       </p>
                     </div>
@@ -116,16 +118,16 @@ const Settings = () => {
               </TabsContent>
 
               <TabsContent value="integrations">
-                <Card>
+                <Card className={cardClasses}>
                   <CardHeader>
                     <CardTitle>Integrações</CardTitle>
-                    <CardDescription>
+                    <CardDescription className={isStudent ? "text-gray-300" : ""}>
                       Gerencie integrações com outros sistemas
                     </CardDescription>
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <p className="text-muted-foreground">
+                      <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                         Aqui você pode configurar integrações com sistemas de pagamento, notificações e outras plataformas.
                       </p>
                     </div>
@@ -136,16 +138,16 @@ const Settings = () => {
           )}
 
           <TabsContent value="notifications">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Configurações de Notificações</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Gerencie como você recebe alertas e notificações
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                     Aqui você pode configurar suas preferências de notificação, como alertas por e-mail, SMS ou no aplicativo.
                   </p>
                 </div>
@@ -154,16 +156,16 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="security">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Configurações de Segurança</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Gerencie sua senha e segurança da conta
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                     Aqui você pode atualizar sua senha, configurar autenticação de dois fatores e outras configurações de segurança.
                   </p>
                 </div>
@@ -172,10 +174,10 @@ const Settings = () => {
           </TabsContent>
 
           <TabsContent value="payment">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Configurações de Pagamento</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   {user?.role === "admin"
                     ? "Configure métodos de pagamento e processadores"
                     : "Configure seus métodos de pagamento e preferências"}
@@ -183,7 +185,7 @@ const Settings = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <p className="text-muted-foreground">
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>
                     {user?.role === "admin"
                       ? "Aqui você pode configurar integrações com processadores de pagamento, taxas, e outras configurações financeiras."
                       : "Aqui você pode adicionar ou remover cartões de crédito, configurar pagamentos recorrentes e gerenciar suas preferências de pagamento."}
@@ -195,16 +197,16 @@ const Settings = () => {
 
           {user?.role === "student" && (
             <TabsContent value="help">
-              <Card>
+              <Card className={cardClasses}>
                 <CardHeader>
                   <CardTitle>Ajuda e Suporte</CardTitle>
-                  <CardDescription>
+                  <CardDescription className="text-gray-300">
                     Obtenha ajuda e respostas para suas dúvidas
                   </CardDescription>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    <p className="text-muted-foreground">
+                    <p className="text-gray-300">
                       Aqui você encontra respostas para perguntas frequentes, tutoriais e pode entrar em contato com o suporte.
                     </p>
                   </div>

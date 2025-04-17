@@ -28,8 +28,13 @@ import {
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Training = () => {
+  const { user } = useAuth();
+  const isStudent = user?.role === "student";
+  const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
+  
   // Mock data for student training schedule
   const [studentSchedule, setStudentSchedule] = useState([
     { id: "1", day: "Segunda", time: "18:00 - 19:30" },
@@ -117,40 +122,44 @@ const Training = () => {
     <AppLayout>
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Treinos</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Treinos</h1>
+          <p className={isStudent ? "text-gray-200" : "text-muted-foreground"}>
             Gerencie seus horários e treinos
           </p>
         </div>
 
-        <Card className="mt-4">
+        <Card className={`mt-4 ${cardClasses}`}>
           <CardHeader className="pb-2">
             <CardTitle>Próxima Aula</CardTitle>
-            <CardDescription>
+            <CardDescription className={isStudent ? "text-gray-300" : ""}>
               Detalhes do seu próximo treino agendado
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                  <Calendar className="h-6 w-6 text-primary" />
+                <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center mr-4">
+                  <Calendar className="h-6 w-6 text-custom-red" />
                 </div>
                 <div>
                   <p className="font-medium text-lg">Segunda-feira</p>
-                  <p className="text-muted-foreground">15 de março de 2024</p>
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>15 de março de 2024</p>
                 </div>
               </div>
               <div className="flex items-center">
-                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                  <Clock className="h-6 w-6 text-primary" />
+                <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center mr-4">
+                  <Clock className="h-6 w-6 text-custom-red" />
                 </div>
                 <div>
                   <p className="font-medium text-lg">18:00 - 19:30</p>
-                  <p className="text-muted-foreground">Duração: 1h30min</p>
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>Duração: 1h30min</p>
                 </div>
               </div>
-              <Button size="lg" onClick={handleConfirmPresence}>
+              <Button 
+                size="lg" 
+                onClick={handleConfirmPresence}
+                className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
+              >
                 <CheckCircle2 className="mr-2 h-4 w-4" />
                 Confirmar Presença
               </Button>
@@ -166,10 +175,10 @@ const Training = () => {
           </TabsList>
 
           <TabsContent value="schedule">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Horários de Treino</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Seus horários agendados
                 </CardDescription>
               </CardHeader>
@@ -178,12 +187,12 @@ const Training = () => {
                   {studentSchedule.map((schedule) => (
                     <div key={schedule.id} className="flex items-center justify-between border-b pb-4 last:border-0">
                       <div className="flex items-center">
-                        <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
-                          <Calendar className="h-6 w-6 text-primary" />
+                        <div className="h-12 w-12 rounded-full bg-custom-red/20 flex items-center justify-center mr-4">
+                          <Calendar className="h-6 w-6 text-custom-red" />
                         </div>
                         <div>
                           <p className="font-medium text-lg">{schedule.day}</p>
-                          <p className="text-muted-foreground">{schedule.time}</p>
+                          <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>{schedule.time}</p>
                         </div>
                       </div>
                       <CheckCircle2 className="h-6 w-6 text-green-500" />
@@ -192,7 +201,12 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full" onClick={handleChangeSchedule}>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={handleChangeSchedule}
+                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
+                >
                   <CalendarClock className="mr-2 h-4 w-4" />
                   Alterar Horários
                 </Button>
@@ -201,11 +215,11 @@ const Training = () => {
           </TabsContent>
 
           <TabsContent value="history">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle>Histórico de Presenças</CardTitle>
-                  <CardDescription>
+                  <CardDescription className={isStudent ? "text-gray-300" : ""}>
                     Registro das suas últimas aulas
                   </CardDescription>
                 </div>
@@ -228,7 +242,7 @@ const Training = () => {
                         </div>
                         <div>
                           <p className="font-medium">{attendance.date}</p>
-                          <p className="text-sm text-muted-foreground">
+                          <p className={isStudent ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>
                             {attendance.time !== "-" ? `Check-in: ${attendance.time}` : "Não compareceu"}
                           </p>
                         </div>
@@ -239,7 +253,11 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button variant="outline" className="w-full" onClick={handleViewFullHistory}>
+                <Button 
+                  variant="outline" 
+                  className="w-full" 
+                  onClick={handleViewFullHistory}
+                >
                   <History className="mr-2 h-4 w-4" />
                   Ver Histórico Completo
                 </Button>
@@ -248,10 +266,10 @@ const Training = () => {
           </TabsContent>
 
           <TabsContent value="change">
-            <Card>
+            <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Alterar Horários</CardTitle>
-                <CardDescription>
+                <CardDescription className={isStudent ? "text-gray-300" : ""}>
                   Selecione novos horários para seus treinos
                 </CardDescription>
               </CardHeader>
@@ -279,7 +297,7 @@ const Training = () => {
 
                   <div className="mt-6">
                     <p className="font-medium">Horários Disponíveis</p>
-                    <p className="text-sm text-muted-foreground mb-4">
+                    <p className={isStudent ? "text-sm text-gray-300 mb-4" : "text-sm text-muted-foreground mb-4"}>
                       Selecione horários adicionais para seu treino.
                     </p>
                     
@@ -295,6 +313,7 @@ const Training = () => {
                             <Button 
                               size="sm"
                               onClick={() => handleAddSchedule(slot)}
+                              className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               Adicionar
@@ -307,7 +326,11 @@ const Training = () => {
                 </div>
               </CardContent>
               <CardFooter>
-                <Button className="w-full" onClick={handleSaveChanges}>
+                <Button 
+                  className="w-full" 
+                  onClick={handleSaveChanges}
+                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
+                >
                   <Save className="mr-2 h-4 w-4" />
                   Salvar Alterações
                 </Button>
