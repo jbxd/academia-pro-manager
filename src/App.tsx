@@ -17,6 +17,7 @@ import Schedules from "./pages/Schedules";
 import Settings from "./pages/Settings";
 import Payments from "./pages/Payments";
 import Training from "./pages/Training";
+import Checkout from "./pages/Checkout";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ const App = () => (
             <Route path="/payments" element={<Payments />} />
             <Route path="/training" element={<Training />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/checkout" element={<Checkout />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

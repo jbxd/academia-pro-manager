@@ -15,11 +15,11 @@ import AttendanceChart from "@/components/charts/AttendanceChart";
 
 const AdminDashboard: React.FC = () => {
   return (
-    <>
+    <div className="bg-gradient-black-red min-h-screen -m-6 p-6">
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <p className="text-gray-200">
             Bem-vindo ao painel administrativo Team Of Monsters
           </p>
         </div>
@@ -364,7 +364,7 @@ const AdminDashboard: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </>
+    </div>
   );
 };
 
