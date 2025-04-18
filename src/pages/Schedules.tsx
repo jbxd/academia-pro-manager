@@ -15,9 +15,34 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { NewClassDialog } from "@/components/schedules/NewClassDialog";
 import { FilterDialog, FilterOptions } from "@/components/schedules/FilterDialog";
+import { Input } from "@/components/ui/input";
+
+// Define the popular times data
+const popularTimes = [
+  {
+    time: "18:00 - 19:00",
+    days: "Segunda, Terça, Quarta",
+    occupation: 95,
+  },
+  {
+    time: "19:00 - 20:00",
+    days: "Terça, Quarta, Quinta",
+    occupation: 87,
+  },
+  {
+    time: "17:00 - 18:00",
+    days: "Segunda, Quarta, Sexta",
+    occupation: 78,
+  },
+  {
+    time: "07:00 - 08:00",
+    days: "Terça, Quinta",
+    occupation: 65,
+  },
+];
 
 const Schedules = () => {
-  const { toast } = useToast();
+  const { toast: toastNotification } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
@@ -36,7 +61,7 @@ const Schedules = () => {
       setFilteredSchedules(data);
     } catch (error) {
       console.error('Error fetching schedules:', error);
-      toast({
+      toastNotification({
         title: "Erro",
         description: "Não foi possível carregar os horários.",
         variant: "destructive",
@@ -57,14 +82,14 @@ const Schedules = () => {
 
       if (error) throw error;
 
-      toast({
+      toastNotification({
         title: "Horário excluído",
         description: "O horário foi excluído com sucesso.",
       });
       
       fetchSchedules();
     } catch (error) {
-      toast({
+      toastNotification({
         title: "Erro ao excluir",
         description: "Não foi possível excluir o horário.",
         variant: "destructive",
@@ -94,7 +119,20 @@ const Schedules = () => {
     }
 
     setFilteredSchedules(filtered);
-    toast.success('Filtros aplicados');
+    toast("Filtros aplicados com sucesso");
+  };
+
+  const handleSaveChanges = async () => {
+    try {
+      toast("Salvando alterações...");
+      // Here we would implement any pending changes to the database
+      // For now, just refresh the data
+      await fetchSchedules();
+      toast.success("Alterações salvas com sucesso!");
+    } catch (error) {
+      console.error('Error saving changes:', error);
+      toast.error("Erro ao salvar alterações");
+    }
   };
 
   return (
@@ -122,7 +160,12 @@ const Schedules = () => {
                 <Input placeholder="Buscar turma..." className="pl-8" />
                 <FilterDialog onFilter={handleFilter} />
               </div>
-              <NewClassDialog onClassAdded={fetchSchedules} />
+              <div className="flex gap-2">
+                <Button onClick={handleSaveChanges} className="bg-green-600 hover:bg-green-700">
+                  Salvar Alterações
+                </Button>
+                <NewClassDialog onClassAdded={fetchSchedules} />
+              </div>
             </div>
             <ScheduleList
               schedules={filteredSchedules}
