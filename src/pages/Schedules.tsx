@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { 
   Clock, Calendar, Users, Plus, 
@@ -24,8 +24,8 @@ const Schedules = () => {
   const isAdmin = user?.role === "admin";
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
   
-  // Mock data for class schedules
-  const schedules = [
+  // Convert schedules to state so we can modify it
+  const [schedules, setSchedules] = useState([
     { 
       id: "1", 
       name: "Musculação", 
@@ -76,7 +76,7 @@ const Schedules = () => {
       current: 18,
       status: "active" 
     },
-  ];
+  ]);
 
   // Mock data for popular times
   const popularTimes = [
@@ -99,7 +99,7 @@ const Schedules = () => {
 
   const handleDelete = (scheduleId: string) => {
     try {
-      // For now we'll just show a success message since there's no backend implementation yet
+      setSchedules(prevSchedules => prevSchedules.filter(schedule => schedule.id !== scheduleId));
       toast({
         title: "Horário excluído",
         description: `O horário foi excluído com sucesso.`,
@@ -228,7 +228,7 @@ const Schedules = () => {
                           Editar
                         </Button>
                         <Button 
-                          className="flex-1 bg-white text-black hover:bg-gray-100"
+                          className="flex-1 bg-red-500 text-white hover:bg-red-600"
                           variant="destructive"
                           onClick={() => handleDelete(schedule.id)}
                         >
