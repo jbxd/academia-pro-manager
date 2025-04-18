@@ -105,27 +105,54 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (supabaseUser: User) => {
     try {
-      // Get user role from user_auth table using a raw query instead of typed query
-      // This avoids TypeScript errors since the table might not be in the types
-      const { data, error } = await supabase
-        .from('user_auth')
-        .select('*')
-        .eq('id', supabaseUser.id)
-        .single();
+      // Use a raw query with rpc (remote procedure call) to avoid TypeScript errors
+      // since the user_auth table is not in the generated types
+      const { data, error } = await supabase.rpc('get_user_role', {
+        user_id: supabaseUser.id
+      }).single();
 
-      if (error) throw error;
+      // If the RPC method doesn't exist or fails, fallback to a raw REST call
+      if (error) {
+        // Attempt to use a raw REST call instead
+        console.log("RPC method not found, trying direct query");
+        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/user_auth?id=eq.${supabaseUser.id}`, {
+          headers: {
+            'apikey': supabase.supabaseKey,
+            'Authorization': `Bearer ${supabase.supabaseKey}`
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error("Failed to fetch user data");
+        }
+        
+        const userData = await response.json();
+        if (userData && userData.length > 0) {
+          const userRole = userData[0].role || 'student';
+          
+          setUser({
+            id: supabaseUser.id,
+            email: supabaseUser.email || '',
+            name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
+            role: userRole as UserRole,
+            avatar: supabaseUser.user_metadata?.avatar_url,
+          });
+          setUsingMockData(false);
+          return;
+        }
+        throw new Error("No user data found");
+      }
 
-      const userData: UserAuth = {
+      // If RPC method succeeded
+      const userRole = data?.role || 'student';
+      
+      setUser({
         id: supabaseUser.id,
         email: supabaseUser.email || '',
-        // Use name from user metadata or email as fallback
         name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
-        // Use role from user_auth or default to 'student'
-        role: (data?.role as UserRole) || 'student',
+        role: userRole as UserRole,
         avatar: supabaseUser.user_metadata?.avatar_url,
-      };
-
-      setUser(userData);
+      });
       setUsingMockData(false);
     } catch (error) {
       console.error("Error fetching user data:", error);
