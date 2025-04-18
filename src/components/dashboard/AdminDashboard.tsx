@@ -1,27 +1,18 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import {
-  Users, DollarSign, CalendarCheck, Clock,
-  TrendingUp, AlertCircle, CheckCircle, Calendar,
-  ArrowRight, Edit2, Trash2
-} from "lucide-react";
 import { Link } from "react-router-dom";
+import { ArrowRight, Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { SummaryCards } from "./admin/SummaryCards";
+import { PendingPaymentsCard } from "./admin/PendingPaymentsCard";
+import { NextEnrollmentsCard } from "./admin/NextEnrollmentsCard";
+import { PeakHoursCard } from "./admin/PeakHoursCard";
 import StudentStatusChart from "@/components/charts/StudentStatusChart";
 import RevenueChart from "@/components/charts/RevenueChart";
 import AttendanceChart from "@/components/charts/AttendanceChart";
 
 const AdminDashboard: React.FC = () => {
-
-  const handleEdit = (id: string) => {
-    alert(`Edit student with ID: ${id}`);
-  };
-
-  const handleDelete = (id: string) => {
-    alert(`Delete student with ID: ${id}`);
-  };
-
   return (
     <div className="bg-gradient-black-red min-h-screen -m-6 p-6">
       <div className="flex flex-col gap-4">
@@ -32,62 +23,8 @@ const AdminDashboard: React.FC = () => {
           </p>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          {/* Summary Cards */}
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Alunos Ativos</p>
-                <p className="text-3xl font-bold">248</p>
-                <p className="text-xs text-green-600">+12% este mês</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-            </CardContent>
-          </Card>
+        <SummaryCards />
 
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Receita Mensal</p>
-                <p className="text-3xl font-bold">R$ 24.580</p>
-                <p className="text-xs text-green-600">+5% vs. último mês</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                <DollarSign className="h-6 w-6 text-green-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Presença Hoje</p>
-                <p className="text-3xl font-bold">78</p>
-                <p className="text-xs">31% dos alunos ativos</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-blue-500/10 flex items-center justify-center">
-                <CalendarCheck className="h-6 w-6 text-blue-500" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-muted-foreground text-sm">Pagamentos Pendentes</p>
-                <p className="text-3xl font-bold">18</p>
-                <p className="text-xs text-amber-600">R$ 3.240 em atraso</p>
-              </div>
-              <div className="h-12 w-12 rounded-full bg-amber-500/10 flex items-center justify-center">
-                <AlertCircle className="h-6 w-6 text-amber-500" />
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Tabs for different dashboard views */}
         <Tabs defaultValue="general" className="mt-4">
           <TabsList>
             <TabsTrigger value="general">Geral</TabsTrigger>
@@ -109,139 +46,12 @@ const AdminDashboard: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <Card className="md:col-span-3">
-                <CardHeader className="pb-2">
-                  <CardTitle>Alunos com Pagamentos Pendentes</CardTitle>
-                  <CardDescription>
-                    Alunos que precisam de atenção
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: "Pedro Oliveira", days: 32, amount: 180, id: "1" },
-                      { name: "Ana Silva", days: 15, amount: 180, id: "2" },
-                      { name: "Marcos Santos", days: 8, amount: 180, id: "3" },
-                      { name: "Juliana Costa", days: 5, amount: 180, id: "4" },
-                      { name: "Rafael Lima", days: 3, amount: 180, id: "5" },
-                    ].map((student, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between border-b pb-2 last:border-0"
-                      >
-                        <div>
-                          <p className="font-medium">{student.name}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {student.days > 30
-                              ? <span className="text-red-500">Inadimplente ({student.days} dias)</span>
-                              : student.days > 10
-                                ? <span className="text-amber-500">Atrasado ({student.days} dias)</span>
-                                : <span className="text-amber-400">Vencendo ({student.days} dias)</span>}
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-medium">R$ {student.amount}</p>
-                          <p className="text-sm text-muted-foreground">Pendente</p>
-                        </div>
-                        <div className="space-x-2">
-                          <Button
-                            className="flex-1 bg-white text-black hover:bg-gray-100"
-                            onClick={() => handleEdit(student.id)}
-                          >
-                            <Edit2 className="h-4 w-4 mr-2" />
-                            Editar
-                          </Button>
-                          <Button
-                            className="flex-1 bg-white text-black hover:bg-gray-100"
-                            onClick={() => handleDelete(student.id)}
-                          >
-                            <Trash2 className="h-4 w-4 mr-2" />
-                            Excluir
-                          </Button>
-                        </div>
-                      </div>
-                    ))}
-
-                    <Button asChild className="w-full">
-                      <Link to="/finances">
-                        Ver todos os pagamentos
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
+              <PendingPaymentsCard />
             </div>
 
             <div className="grid gap-4 md:grid-cols-2">
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Próximas Matrículas</CardTitle>
-                  <CardDescription>
-                    Alunos com matrícula para esta semana
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { name: "Carolina Mendes", date: "Hoje, 14:30", plan: "Plano Trimestral" },
-                      { name: "Bruno Alves", date: "Amanhã, 10:00", plan: "Plano Anual" },
-                      { name: "Fernanda Torres", date: "Quarta, 16:00", plan: "Plano Mensal" },
-                    ].map((student, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between border-b pb-2 last:border-0"
-                      >
-                        <div>
-                          <p className="font-medium">{student.name}</p>
-                          <p className="text-sm text-muted-foreground">{student.date}</p>
-                        </div>
-                        <div>
-                          <span className="bg-primary/10 text-primary text-xs rounded-full px-2 py-1">
-                            {student.plan}
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle>Horários Mais Procurados</CardTitle>
-                  <CardDescription>
-                    Horários com maior ocupação esta semana
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {[
-                      { time: "18:00 - 19:00", day: "Segunda a Sexta", occupation: 95 },
-                      { time: "19:00 - 20:00", day: "Segunda a Sexta", occupation: 90 },
-                      { time: "17:00 - 18:00", day: "Segunda a Sexta", occupation: 85 },
-                      { time: "10:00 - 11:00", day: "Sábado", occupation: 80 },
-                    ].map((schedule, index) => (
-                      <div
-                        key={index}
-                        className="space-y-1 border-b pb-2 last:border-0"
-                      >
-                        <div className="flex items-center justify-between">
-                          <p className="font-medium">{schedule.time}</p>
-                          <span className="text-sm font-medium">{schedule.occupation}%</span>
-                        </div>
-                        <div className="text-sm text-muted-foreground">{schedule.day}</div>
-                        <div className="h-2 w-full bg-muted overflow-hidden rounded-full">
-                          <div
-                            className="h-full bg-primary"
-                            style={{ width: `${schedule.occupation}%` }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+              <NextEnrollmentsCard />
+              <PeakHoursCard />
             </div>
           </TabsContent>
 

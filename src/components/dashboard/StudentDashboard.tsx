@@ -7,6 +7,8 @@ import { Calendar, CreditCard, Clock, CheckCircle2, Dumbbell, ArrowRight, Info, 
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { createClient } from '@supabase/supabase-js';
+import { MembershipCard } from "./student/MembershipCard";
+import { ScheduleCard } from "./student/ScheduleCard";
 
 const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
@@ -34,13 +36,6 @@ const StudentDashboard: React.FC = () => {
       { day: "Quarta", time: "18:00 - 19:30" },
       { day: "Sexta", time: "18:00 - 19:30" },
     ]
-  };
-
-  const progress = (studentData.membership.daysLeft / studentData.membership.totalDays) * 100;
-
-  const handlePayment = () => {
-    // Redirect to checkout page
-    navigate("/checkout");
   };
 
   const handleConfirmAttendance = async () => {
@@ -71,16 +66,6 @@ const StudentDashboard: React.FC = () => {
     }
   };
 
-  const handleViewDetails = () => {
-    // Placeholder for view details action
-    toast.info("Visualizando detalhes...");
-  };
-
-  const handleDelete = () => {
-    // Placeholder for delete action
-    toast.warning("Item excluído!");
-  };
-
   return (
     <div className="bg-gradient-black-red min-h-screen -m-6 p-6">
       <div className="flex flex-col gap-4">
@@ -92,92 +77,9 @@ const StudentDashboard: React.FC = () => {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="bg-black/40 text-white border-gray-700">
-            <CardHeader className="pb-2">
-              <CardTitle>Status da Mensalidade</CardTitle>
-              <CardDescription className="text-gray-300">
-                {studentData.membership.plan}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-300">Período:</span>
-                <span className="font-medium">{studentData.membership.startDate} até {studentData.membership.endDate}</span>
-              </div>
-
-              <div className="space-y-1">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-gray-300">Dias restantes:</span>
-                  <span className="font-medium">{studentData.membership.daysLeft} dias</span>
-                </div>
-                <Progress value={progress} className="h-2" />
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-300">Próximo pagamento:</span>
-                <span className="font-medium">{studentData.membership.nextPayment}</span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-300">Valor:</span>
-                <span className="font-medium">{studentData.membership.amount}</span>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button asChild variant="outline" className="w-full bg-custom-red text-white hover:bg-custom-red/80 border-none">
-                <Link to="/checkout">
-                  <CreditCard className="mr-2 h-4 w-4" />
-                  Realizar pagamento
-                </Link>
-              </Button>
-            </CardFooter>
-          </Card>
-
-          <Card>
-            <CardHeader className="pb-2">
-              <CardTitle>Horários de Treino</CardTitle>
-              <CardDescription>
-                Seus horários agendados
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {studentData.schedule.map((schedule, index) => (
-                <div key={index} className="flex items-center justify-between border-b pb-2 last:border-0">
-                  <div className="flex items-center">
-                    <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center mr-3">
-                      <Calendar className="h-4 w-4 text-primary" />
-                    </div>
-                    <div>
-                      <p className="font-medium">{schedule.day}</p>
-                      <p className="text-sm text-muted-foreground">{schedule.time}</p>
-                    </div>
-                  </div>
-                  <CheckCircle2 className="h-5 w-5 text-green-500" />
-                </div>
-              ))}
-            </CardContent>
-            <CardFooter>
-              <div className="flex gap-2 w-full">
-                <Button 
-                  variant="outline" 
-                  className="flex-1 bg-white text-black hover:bg-gray-100"
-                  onClick={() => handleViewDetails()}
-                >
-                  <Info className="h-4 w-4 mr-2" />
-                  Detalhes
-                </Button>
-                <Button 
-                  variant="outline"
-                  className="flex-1 bg-white text-black hover:bg-gray-100"
-                  onClick={() => handleDelete()}
-                >
-                  <Trash2 className="h-4 w-4 mr-2" />
-                  Excluir
-                </Button>
-              </div>
-            </CardFooter>
-          </Card>
-
+          <MembershipCard membership={studentData.membership} />
+          <ScheduleCard schedule={studentData.schedule} />
+          
           <Card>
             <CardHeader className="pb-2">
               <CardTitle>Últimas Presenças</CardTitle>
