@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -105,55 +104,80 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserData = async (supabaseUser: User) => {
     try {
-      // Use a raw query with rpc (remote procedure call) to avoid TypeScript errors
-      // since the user_auth table is not in the generated types
-      const { data, error } = await supabase.rpc('get_user_role', {
-        user_id: supabaseUser.id
-      }).single();
-
-      // If the RPC method doesn't exist or fails, fallback to a raw REST call
-      if (error) {
-        // Attempt to use a raw REST call instead
-        console.log("RPC method not found, trying direct query");
-        const response = await fetch(`${supabase.supabaseUrl}/rest/v1/user_auth?id=eq.${supabaseUser.id}`, {
+      // Instead of using RPC which is causing issues, try using a simpler approach
+      // We'll try a few different methods in sequence to get user data
+      
+      // First, try a direct fetch using the REST API
+      try {
+        // Get Supabase URL and key from the environment or from the window object
+        const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://vedrtlglkvzcdxdjjjgy.supabase.co';
+        const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZHJ0bGdsa3Z6Y2R4ZGpqamd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzQ0MzUsImV4cCI6MjA2MDQxMDQzNX0.PxGL1A2SVdaGRmMJFQscFiV9nymCzFdIwdReElW8TYU';
+        
+        const response = await fetch(`${supabaseUrl}/rest/v1/user_auth?id=eq.${supabaseUser.id}`, {
           headers: {
-            'apikey': supabase.supabaseKey,
-            'Authorization': `Bearer ${supabase.supabaseKey}`
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
           }
         });
         
-        if (!response.ok) {
-          throw new Error("Failed to fetch user data");
+        if (response.ok) {
+          const userData = await response.json();
+          if (userData && userData.length > 0) {
+            const userRole = userData[0].role || 'student';
+            
+            setUser({
+              id: supabaseUser.id,
+              email: supabaseUser.email || '',
+              name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
+              role: userRole as UserRole,
+              avatar: supabaseUser.user_metadata?.avatar_url,
+            });
+            setUsingMockData(false);
+            return;
+          }
         }
-        
-        const userData = await response.json();
-        if (userData && userData.length > 0) {
-          const userRole = userData[0].role || 'student';
+      } catch (fetchError) {
+        console.error("Error fetching user data via REST:", fetchError);
+      }
+      
+      // If direct fetch fails, try to get user role from profiles table which is in the types
+      try {
+        const { data: profileData } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', supabaseUser.id)
+          .maybeSingle();
           
+        if (profileData) {
           setUser({
             id: supabaseUser.id,
             email: supabaseUser.email || '',
             name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
-            role: userRole as UserRole,
+            role: (profileData.role as UserRole) || 'student',
             avatar: supabaseUser.user_metadata?.avatar_url,
           });
           setUsingMockData(false);
           return;
         }
-        throw new Error("No user data found");
+      } catch (profileError) {
+        console.error("Error fetching profile data:", profileError);
       }
-
-      // If RPC method succeeded
-      const userRole = data?.role || 'student';
       
-      setUser({
-        id: supabaseUser.id,
-        email: supabaseUser.email || '',
-        name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
-        role: userRole as UserRole,
-        avatar: supabaseUser.user_metadata?.avatar_url,
-      });
-      setUsingMockData(false);
+      // If all else fails, fallback to mock data if available
+      const mockUser = MOCK_USERS.find(u => u.email === supabaseUser.email);
+      if (mockUser) {
+        const { password: _, ...userWithoutPassword } = mockUser;
+        setUser(userWithoutPassword);
+        setUsingMockData(true);
+      } else {
+        // Create basic user object from Supabase data
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || '',
+          name: supabaseUser.email?.split('@')[0] || '',
+          role: 'student',
+        });
+      }
     } catch (error) {
       console.error("Error fetching user data:", error);
       // Fallback to mock data if available
