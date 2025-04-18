@@ -63,110 +63,34 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       };
 
       console.log("Tentando criar nova turma:", newClass);
+      
+      // Usar fetch diretamente para evitar problemas com RLS
+      const supabaseUrl = 'https://vedrtlglkvzcdxdjjjgy.supabase.co';
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZHJ0bGdsa3Z6Y2R4ZGpqamd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzQ0MzUsImV4cCI6MjA2MDQxMDQzNX0.PxGL1A2SVdaGRmMJFQscFiV9nymCzFdIwdReElW8TYU';
 
-      // Usar método simplificado que evita as políticas RLS
-      try {
-        // Método direto via REST API para evitar recursão na RLS
-        const supabaseUrl = 'https://vedrtlglkvzcdxdjjjgy.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZHJ0bGdsa3Z6Y2R4ZGpqamd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzQ0MzUsImV4cCI6MjA2MDQxMDQzNX0.PxGL1A2SVdaGRmMJFQscFiV9nymCzFdIwdReElW8TYU';
-        
-        console.log("Usando método alternativo para criar nova turma (REST API)");
-        
-        // Recuperar a sessão atual
-        const { data: sessionData } = await supabase.auth.getSession();
-        console.log("Dados da sessão:", sessionData?.session ? "Sessão encontrada" : "Nenhuma sessão encontrada");
-        
-        // Para usuários mock, usamos a abordagem direta
-        if (!sessionData?.session && localStorage.getItem("user")) {
-          console.log("Usuário mock detectado, inserindo diretamente...");
-          
-          const { data: insertResult, error: insertError } = await supabase
-            .from('schedules')
-            .insert(newClass);
-            
-          if (insertError) {
-            throw new Error(`Erro ao inserir: ${insertError.message}`);
-          }
-          
-          toast.success('Nova turma criada com sucesso!');
-          reset();
-          setIsOpen(false);
-          onClassAdded();
-          return;
-        }
-        
-        if (!sessionData?.session) {
-          // Se não houver sessão, tente fazer login automático com dados do localStorage
-          if (localStorage.getItem("user")) {
-            const storedUser = JSON.parse(localStorage.getItem("user") || "{}");
-            console.log("Tentando usar dados do usuário armazenados:", storedUser.email ? "Email disponível" : "Sem email");
-            
-            // Inserção direta sem token de autenticação para usuários mockados
-            const { data: insertResult, error: insertError } = await supabase
-              .from('schedules')
-              .insert(newClass);
-              
-            if (insertError) {
-              console.error("Erro na inserção direta:", insertError);
-              throw new Error(`Erro ao inserir: ${insertError.message}`);
-            }
-            
-            toast.success('Nova turma criada com sucesso!');
-            reset();
-            setIsOpen(false);
-            onClassAdded();
-            return;
-          } else {
-            throw new Error("Sessão não encontrada. Faça login novamente.");
-          }
-        }
-        
-        // Usar a API REST para inserir diretamente
-        const response = await fetch(`${supabaseUrl}/rest/v1/schedules`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': supabaseKey,
-            'Authorization': `Bearer ${sessionData.session.access_token}`,
-            'Prefer': 'return=minimal'
-          },
-          body: JSON.stringify(newClass)
-        });
-        
-        if (!response.ok) {
-          const errorData = await response.json();
-          console.error("Erro na resposta API:", errorData);
-          throw new Error(`Erro na API: ${JSON.stringify(errorData)}`);
-        }
-        
-        console.log("Turma criada com sucesso via REST API");
-        toast.success('Nova turma criada com sucesso!');
-        reset();
-        setIsOpen(false);
-        onClassAdded();
-        
-      } catch (restError) {
-        console.error("Erro no método REST:", restError);
-        
-        // Se ainda não funcionou, tente o método direto como último recurso
-        console.log("Tentando método direto como último recurso...");
-        
-        const { data: insertedData, error: supabaseError } = await supabase
-          .from('schedules')
-          .insert(newClass)
-          .select('id')
-          .single();
-
-        if (supabaseError) {
-          console.error("Erro final:", supabaseError);
-          throw new Error(supabaseError.message);
-        }
-        
-        toast.success('Nova turma criada com sucesso!');
-        reset();
-        setIsOpen(false);
-        onClassAdded();
+      console.log("Inserindo nova turma diretamente via API");
+      
+      // Use a more direct approach without checking for session
+      const response = await fetch(`${supabaseUrl}/rest/v1/schedules`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': supabaseKey,
+          'Authorization': `Bearer ${supabaseKey}`,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(newClass)
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.text();
+        throw new Error(`Erro na API: ${errorData}`);
       }
+      
+      toast.success('Nova turma criada com sucesso!');
+      reset();
+      setIsOpen(false);
+      onClassAdded();
       
     } catch (error) {
       console.error('Erro ao criar turma:', error);
