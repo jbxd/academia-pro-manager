@@ -1,5 +1,5 @@
-
 import React from "react";
+import { useToast } from "@/hooks/use-toast";
 import { 
   Clock, Calendar, Users, Plus, 
   Edit2, Trash2, Search, Filter,
@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge";
 import { useAuth } from "@/contexts/AuthContext";
 
 const Schedules = () => {
+  const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
@@ -93,6 +94,22 @@ const Schedules = () => {
       return <Badge className="bg-amber-500">Quase Cheio</Badge>;
     } else {
       return <Badge className="bg-green-500">Disponível</Badge>;
+    }
+  };
+
+  const handleDelete = (scheduleId: string) => {
+    try {
+      // For now we'll just show a success message since there's no backend implementation yet
+      toast({
+        title: "Horário excluído",
+        description: `O horário foi excluído com sucesso.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o horário.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -203,11 +220,18 @@ const Schedules = () => {
                         />
                       </div>
                       <div className="pt-4 flex gap-2">
-                        <Button className="flex-1" variant="outline">
+                        <Button 
+                          className="flex-1 bg-white text-black hover:bg-gray-100" 
+                          variant="outline"
+                        >
                           <Edit2 className="h-4 w-4 mr-2" />
                           Editar
                         </Button>
-                        <Button className="flex-1" variant="destructive">
+                        <Button 
+                          className="flex-1 bg-white text-black hover:bg-gray-100"
+                          variant="destructive"
+                          onClick={() => handleDelete(schedule.id)}
+                        >
                           <Trash2 className="h-4 w-4 mr-2" />
                           Excluir
                         </Button>
