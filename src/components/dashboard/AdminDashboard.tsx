@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -6,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import {
   Users, DollarSign, CalendarCheck, Clock,
   TrendingUp, AlertCircle, CheckCircle, Calendar,
-  ArrowRight
+  ArrowRight, Edit2, Trash2
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import StudentStatusChart from "@/components/charts/StudentStatusChart";
@@ -14,6 +13,15 @@ import RevenueChart from "@/components/charts/RevenueChart";
 import AttendanceChart from "@/components/charts/AttendanceChart";
 
 const AdminDashboard: React.FC = () => {
+
+  const handleEdit = (id: string) => {
+    alert(`Edit student with ID: ${id}`);
+  };
+
+  const handleDelete = (id: string) => {
+    alert(`Delete student with ID: ${id}`);
+  };
+
   return (
     <div className="bg-gradient-black-red min-h-screen -m-6 p-6">
       <div className="flex flex-col gap-4">
@@ -111,11 +119,11 @@ const AdminDashboard: React.FC = () => {
                 <CardContent>
                   <div className="space-y-4">
                     {[
-                      { name: "Pedro Oliveira", days: 32, amount: 180 },
-                      { name: "Ana Silva", days: 15, amount: 180 },
-                      { name: "Marcos Santos", days: 8, amount: 180 },
-                      { name: "Juliana Costa", days: 5, amount: 180 },
-                      { name: "Rafael Lima", days: 3, amount: 180 },
+                      { name: "Pedro Oliveira", days: 32, amount: 180, id: "1" },
+                      { name: "Ana Silva", days: 15, amount: 180, id: "2" },
+                      { name: "Marcos Santos", days: 8, amount: 180, id: "3" },
+                      { name: "Juliana Costa", days: 5, amount: 180, id: "4" },
+                      { name: "Rafael Lima", days: 3, amount: 180, id: "5" },
                     ].map((student, index) => (
                       <div
                         key={index}
@@ -124,16 +132,32 @@ const AdminDashboard: React.FC = () => {
                         <div>
                           <p className="font-medium">{student.name}</p>
                           <p className="text-sm text-muted-foreground">
-                            {student.days > 30 
-                              ? <span className="text-red-500">Inadimplente ({student.days} dias)</span> 
-                              : student.days > 10 
-                              ? <span className="text-amber-500">Atrasado ({student.days} dias)</span>
-                              : <span className="text-amber-400">Vencendo ({student.days} dias)</span>}
+                            {student.days > 30
+                              ? <span className="text-red-500">Inadimplente ({student.days} dias)</span>
+                              : student.days > 10
+                                ? <span className="text-amber-500">Atrasado ({student.days} dias)</span>
+                                : <span className="text-amber-400">Vencendo ({student.days} dias)</span>}
                           </p>
                         </div>
                         <div className="text-right">
                           <p className="font-medium">R$ {student.amount}</p>
                           <p className="text-sm text-muted-foreground">Pendente</p>
+                        </div>
+                        <div className="space-x-2">
+                          <Button
+                            className="flex-1 bg-white text-black hover:bg-gray-100"
+                            onClick={() => handleEdit(student.id)}
+                          >
+                            <Edit2 className="h-4 w-4 mr-2" />
+                            Editar
+                          </Button>
+                          <Button
+                            className="flex-1 bg-white text-black hover:bg-gray-100"
+                            onClick={() => handleDelete(student.id)}
+                          >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            Excluir
+                          </Button>
                         </div>
                       </div>
                     ))}

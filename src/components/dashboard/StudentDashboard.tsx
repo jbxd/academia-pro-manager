@@ -3,7 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter }
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Link } from "react-router-dom";
-import { Calendar, CreditCard, Clock, CheckCircle2, Dumbbell, ArrowRight } from "lucide-react";
+import { Calendar, CreditCard, Clock, CheckCircle2, Dumbbell, ArrowRight, Info, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { createClient } from '@supabase/supabase-js';
@@ -69,6 +69,16 @@ const StudentDashboard: React.FC = () => {
       console.error("Erro ao confirmar presença:", error);
       toast.error("Erro ao confirmar presença. Tente novamente.");
     }
+  };
+
+  const handleViewDetails = () => {
+    // Placeholder for view details action
+    toast.info("Visualizando detalhes...");
+  };
+
+  const handleDelete = () => {
+    // Placeholder for delete action
+    toast.warning("Item excluído!");
   };
 
   return (
@@ -147,12 +157,24 @@ const StudentDashboard: React.FC = () => {
               ))}
             </CardContent>
             <CardFooter>
-              <Button asChild variant="outline" className="w-full">
-                <Link to="/training">
-                  <Clock className="mr-2 h-4 w-4" />
-                  Alterar horários
-                </Link>
-              </Button>
+              <div className="flex gap-2 w-full">
+                <Button 
+                  variant="outline" 
+                  className="flex-1 bg-white text-black hover:bg-gray-100"
+                  onClick={() => handleViewDetails()}
+                >
+                  <Info className="h-4 w-4 mr-2" />
+                  Detalhes
+                </Button>
+                <Button 
+                  variant="outline"
+                  className="flex-1 bg-white text-black hover:bg-gray-100"
+                  onClick={() => handleDelete()}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Excluir
+                </Button>
+              </div>
             </CardFooter>
           </Card>
 
