@@ -17,6 +17,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAuth } from "@/contexts/AuthContext";
 
 // Validation schema for the new class form
 const newClassSchema = z.object({
@@ -40,9 +41,18 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
   });
 
   const [isOpen, setIsOpen] = React.useState(false);
+  const { user, isAuthenticated } = useAuth();
 
   const onSubmit = async (data: NewClassFormData) => {
     try {
+      if (!isAuthenticated) {
+        toast.error("Você precisa estar logado para criar uma turma.");
+        return;
+      }
+
+      // Log important information
+      console.log("Creating class with user:", user);
+      
       // Prepare the data with proper type conversion
       const newClass = {
         name: data.name,
@@ -71,7 +81,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       onClassAdded();
     } catch (error) {
       console.error('Error creating class:', error);
-      toast.error('Erro ao criar nova turma. ' + error.message);
+      toast.error(`Erro ao criar nova turma: ${error.message}`);
     }
   };
 
