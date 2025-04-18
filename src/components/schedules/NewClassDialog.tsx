@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -62,6 +63,9 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Criar Nova Turma</DialogTitle>
+          <DialogDescription>
+            Preencha os detalhes para criar uma nova turma.
+          </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           <div>
