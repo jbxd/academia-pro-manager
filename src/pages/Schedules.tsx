@@ -1,21 +1,14 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Calendar } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { StatsCards } from "@/components/schedules/StatsCards";
-import { ScheduleList } from "@/components/schedules/ScheduleList";
-import { SearchBar } from "@/components/schedules/SearchBar";
-import { AnalyticsTab } from "@/components/schedules/AnalyticsTab";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { NewClassDialog } from "@/components/schedules/NewClassDialog";
-import { FilterDialog, FilterOptions } from "@/components/schedules/FilterDialog";
-import { Input } from "@/components/ui/input";
+import { SchedulesHeader } from "@/components/schedules/SchedulesHeader";
+import { ScheduleControls } from "@/components/schedules/ScheduleControls";
+import { ScheduleContent } from "@/components/schedules/ScheduleContent";
 
 // Define the popular times data
 const popularTimes = [
@@ -51,6 +44,7 @@ const Schedules = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("classes");
 
   const fetchSchedules = async () => {
     setLoading(true);
@@ -86,30 +80,6 @@ const Schedules = () => {
     fetchSchedules();
   }, []);
 
-  const handleDelete = async (scheduleId: string) => {
-    try {
-      const { error } = await supabase
-        .from('schedules')
-        .delete()
-        .eq('id', scheduleId);
-
-      if (error) throw error;
-
-      toastNotification({
-        title: "Horário excluído",
-        description: "O horário foi excluído com sucesso.",
-      });
-      
-      fetchSchedules();
-    } catch (error) {
-      toastNotification({
-        title: "Erro ao excluir",
-        description: "Não foi possível excluir o horário.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
     const term = event.target.value.toLowerCase();
     setSearchTerm(term);
@@ -126,7 +96,7 @@ const Schedules = () => {
     setFilteredSchedules(filtered);
   };
 
-  const handleFilter = (filters: FilterOptions) => {
+  const handleFilter = (filters: any) => {
     let filtered = [...schedules];
 
     if (filters.instructor) {
@@ -151,11 +121,33 @@ const Schedules = () => {
     toast("Filtros aplicados com sucesso");
   };
 
+  const handleDelete = async (scheduleId: string) => {
+    try {
+      const { error } = await supabase
+        .from('schedules')
+        .delete()
+        .eq('id', scheduleId);
+
+      if (error) throw error;
+
+      toastNotification({
+        title: "Horário excluído",
+        description: "O horário foi excluído com sucesso.",
+      });
+      
+      fetchSchedules();
+    } catch (error) {
+      toastNotification({
+        title: "Erro ao excluir",
+        description: "Não foi possível excluir o horário.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const handleSaveChanges = async () => {
     try {
       toast("Salvando alterações...");
-      // Here we would implement any pending changes to the database
-      // For now, just refresh the data
       await fetchSchedules();
       toast.success("Alterações salvas com sucesso!");
     } catch (error) {
@@ -167,16 +159,10 @@ const Schedules = () => {
   return (
     <AppLayout>
       <div className="flex flex-col gap-4">
-        <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-bold text-white">Gestão de Horários</h1>
-          <p className="text-gray-200">
-            Gerencie os horários e turmas do Team Of Monsters
-          </p>
-        </div>
-
+        <SchedulesHeader />
         <StatsCards isAdmin={isAdmin} cardClasses={cardClasses} />
 
-        <Tabs defaultValue="classes" className="space-y-4">
+        <Tabs defaultValue="classes" className="space-y-4" onValueChange={setActiveTab}>
           <TabsList>
             <TabsTrigger value="classes">Aulas e Turmas</TabsTrigger>
             <TabsTrigger value="calendar">Calendário</TabsTrigger>
@@ -184,77 +170,57 @@ const Schedules = () => {
           </TabsList>
 
           <TabsContent value="classes" className="space-y-4">
-            <div className="flex flex-col md:flex-row gap-4 justify-between">
-              <div className="flex gap-2 w-full md:w-auto">
-                <Input 
-                  placeholder="Buscar turma..." 
-                  className="pl-8" 
-                  value={searchTerm}
-                  onChange={handleSearch}
-                />
-                <FilterDialog onFilter={handleFilter} />
-              </div>
-              <div className="flex gap-2">
-                <Button onClick={handleSaveChanges} className="bg-green-600 hover:bg-green-700">
-                  Salvar Alterações
-                </Button>
-                <NewClassDialog onClassAdded={fetchSchedules} />
-              </div>
-            </div>
-            {loading ? (
-              <div className="flex items-center justify-center p-8">
-                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
-              </div>
-            ) : error ? (
-              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
-                <strong className="font-bold">Erro!</strong>
-                <span className="block sm:inline"> Não foi possível carregar as turmas. Tente novamente mais tarde.</span>
-              </div>
-            ) : filteredSchedules.length === 0 ? (
-              <div className="text-center py-8">
-                <p className="text-gray-400 text-lg">Nenhuma turma encontrada.</p>
-                {searchTerm && (
-                  <Button 
-                    variant="outline" 
-                    className="mt-4"
-                    onClick={() => {
-                      setSearchTerm("");
-                      setFilteredSchedules(schedules);
-                    }}
-                  >
-                    Limpar busca
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <ScheduleList
-                schedules={filteredSchedules}
-                isAdmin={isAdmin}
-                cardClasses={cardClasses}
-                onDelete={handleDelete}
-              />
-            )}
+            <ScheduleControls
+              searchTerm={searchTerm}
+              onSearch={handleSearch}
+              onFilter={handleFilter}
+              onSaveChanges={handleSaveChanges}
+              onClassAdded={fetchSchedules}
+            />
+            <ScheduleContent
+              loading={loading}
+              error={error}
+              filteredSchedules={filteredSchedules}
+              searchTerm={searchTerm}
+              onClearSearch={() => {
+                setSearchTerm("");
+                setFilteredSchedules(schedules);
+              }}
+              isAdmin={isAdmin}
+              cardClasses={cardClasses}
+              onDelete={handleDelete}
+              popularTimes={popularTimes}
+              activeTab={activeTab}
+            />
           </TabsContent>
 
           <TabsContent value="calendar">
-            <Card className={cardClasses}>
-              <CardHeader>
-                <CardTitle>Calendário de Aulas</CardTitle>
-              </CardHeader>
-              <CardContent className="min-h-[400px] flex items-center justify-center">
-                <div className="text-center">
-                  <Calendar className="h-12 w-12 mx-auto text-muted-foreground" />
-                  <p className="mt-2">Calendário de aulas seria exibido aqui</p>
-                </div>
-              </CardContent>
-            </Card>
+            <ScheduleContent
+              loading={loading}
+              error={error}
+              filteredSchedules={filteredSchedules}
+              searchTerm={searchTerm}
+              onClearSearch={() => {}}
+              isAdmin={isAdmin}
+              cardClasses={cardClasses}
+              onDelete={handleDelete}
+              popularTimes={popularTimes}
+              activeTab={activeTab}
+            />
           </TabsContent>
 
           <TabsContent value="analytics">
-            <AnalyticsTab
-              cardClasses={cardClasses}
+            <ScheduleContent
+              loading={loading}
+              error={error}
+              filteredSchedules={filteredSchedules}
+              searchTerm={searchTerm}
+              onClearSearch={() => {}}
               isAdmin={isAdmin}
+              cardClasses={cardClasses}
+              onDelete={handleDelete}
               popularTimes={popularTimes}
+              activeTab={activeTab}
             />
           </TabsContent>
         </Tabs>
