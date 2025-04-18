@@ -27,10 +27,13 @@ interface NewClassFormData {
 export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) => {
   const { register, handleSubmit, reset, formState: { errors } } = useForm<NewClassFormData>();
   const [isOpen, setIsOpen] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const onSubmit = async (data: NewClassFormData) => {
+    setIsSubmitting(true);
     try {
-      const { error } = await supabase.from('schedules').insert({
+      // Prepare the data with proper type conversion
+      const newClass = {
         name: data.name,
         instructor: data.instructor,
         days: data.days.split(',').map(day => day.trim()),
@@ -38,17 +41,31 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         capacity: parseInt(data.capacity.toString()),
         current: 0,
         status: 'active'
-      });
+      };
 
-      if (error) throw error;
+      console.log("Attempting to insert:", newClass);
 
+      // Insert the data into Supabase
+      const { data: insertedData, error } = await supabase
+        .from('schedules')
+        .insert(newClass)
+        .select();
+
+      if (error) {
+        console.error('Detailed error:', error);
+        throw error;
+      }
+
+      console.log("Insert successful:", insertedData);
       toast.success('Nova turma criada com sucesso!');
       reset();
       setIsOpen(false);
       onClassAdded();
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('Erro ao criar nova turma');
+      console.error('Error creating class:', error);
+      toast.error('Erro ao criar nova turma. Verifique o console para mais detalhes.');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,7 +133,9 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             />
             {errors.capacity && <span className="text-sm text-red-500">Campo obrigatório e deve ser maior que 0</span>}
           </div>
-          <Button type="submit" className="w-full">Criar Turma</Button>
+          <Button type="submit" className="w-full" disabled={isSubmitting}>
+            {isSubmitting ? 'Criando...' : 'Criar Turma'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -48,24 +48,37 @@ const Schedules = () => {
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
   const [schedules, setSchedules] = useState([]);
   const [filteredSchedules, setFilteredSchedules] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const fetchSchedules = async () => {
+    setLoading(true);
+    setError(null);
     try {
+      console.log("Fetching schedules...");
       const { data, error } = await supabase
         .from('schedules')
         .select('*');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
-      setSchedules(data);
-      setFilteredSchedules(data);
+      console.log("Schedules fetched:", data);
+      setSchedules(data || []);
+      setFilteredSchedules(data || []);
     } catch (error) {
       console.error('Error fetching schedules:', error);
+      setError(error.message);
       toastNotification({
         title: "Erro",
         description: "Não foi possível carregar os horários.",
         variant: "destructive",
       });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -95,6 +108,22 @@ const Schedules = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleSearch = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const term = event.target.value.toLowerCase();
+    setSearchTerm(term);
+    
+    if (!term.trim()) {
+      setFilteredSchedules(schedules);
+      return;
+    }
+    
+    const filtered = schedules.filter(schedule => 
+      schedule.name.toLowerCase().includes(term) ||
+      schedule.instructor.toLowerCase().includes(term)
+    );
+    setFilteredSchedules(filtered);
   };
 
   const handleFilter = (filters: FilterOptions) => {
@@ -157,7 +186,12 @@ const Schedules = () => {
           <TabsContent value="classes" className="space-y-4">
             <div className="flex flex-col md:flex-row gap-4 justify-between">
               <div className="flex gap-2 w-full md:w-auto">
-                <Input placeholder="Buscar turma..." className="pl-8" />
+                <Input 
+                  placeholder="Buscar turma..." 
+                  className="pl-8" 
+                  value={searchTerm}
+                  onChange={handleSearch}
+                />
                 <FilterDialog onFilter={handleFilter} />
               </div>
               <div className="flex gap-2">
@@ -167,12 +201,39 @@ const Schedules = () => {
                 <NewClassDialog onClassAdded={fetchSchedules} />
               </div>
             </div>
-            <ScheduleList
-              schedules={filteredSchedules}
-              isAdmin={isAdmin}
-              cardClasses={cardClasses}
-              onDelete={handleDelete}
-            />
+            {loading ? (
+              <div className="flex items-center justify-center p-8">
+                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white"></div>
+              </div>
+            ) : error ? (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative">
+                <strong className="font-bold">Erro!</strong>
+                <span className="block sm:inline"> Não foi possível carregar as turmas. Tente novamente mais tarde.</span>
+              </div>
+            ) : filteredSchedules.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-400 text-lg">Nenhuma turma encontrada.</p>
+                {searchTerm && (
+                  <Button 
+                    variant="outline" 
+                    className="mt-4"
+                    onClick={() => {
+                      setSearchTerm("");
+                      setFilteredSchedules(schedules);
+                    }}
+                  >
+                    Limpar busca
+                  </Button>
+                )}
+              </div>
+            ) : (
+              <ScheduleList
+                schedules={filteredSchedules}
+                isAdmin={isAdmin}
+                cardClasses={cardClasses}
+                onDelete={handleDelete}
+              />
+            )}
           </TabsContent>
 
           <TabsContent value="calendar">
