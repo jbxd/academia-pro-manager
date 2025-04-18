@@ -15,22 +15,33 @@ import { Plus } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface NewClassFormData {
-  name: string;
-  instructor: string;
-  days: string;
-  time: string;
-  capacity: number;
-}
+// Validation schema for the new class form
+const newClassSchema = z.object({
+  name: z.string().min(1, "Nome da turma é obrigatório"),
+  instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
+  days: z.string().min(1, "Dias são obrigatórios"),
+  time: z.string().min(1, "Horário é obrigatório"),
+  capacity: z.coerce.number().min(1, "Capacidade deve ser maior que zero")
+});
+
+type NewClassFormData = z.infer<typeof newClassSchema>;
 
 export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) => {
-  const { register, handleSubmit, reset, formState: { errors } } = useForm<NewClassFormData>();
+  const { 
+    register, 
+    handleSubmit, 
+    reset, 
+    formState: { errors, isSubmitting } 
+  } = useForm<NewClassFormData>({
+    resolver: zodResolver(newClassSchema)
+  });
+
   const [isOpen, setIsOpen] = React.useState(false);
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const onSubmit = async (data: NewClassFormData) => {
-    setIsSubmitting(true);
     try {
       // Prepare the data with proper type conversion
       const newClass = {
@@ -38,12 +49,10 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         instructor: data.instructor,
         days: data.days.split(',').map(day => day.trim()),
         time: data.time,
-        capacity: parseInt(data.capacity.toString()),
+        capacity: data.capacity,
         current: 0,
         status: 'active'
       };
-
-      console.log("Attempting to insert:", newClass);
 
       // Insert the data into Supabase
       const { data: insertedData, error } = await supabase
@@ -53,19 +62,16 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
 
       if (error) {
         console.error('Detailed error:', error);
-        throw error;
+        throw new Error(error.message);
       }
 
-      console.log("Insert successful:", insertedData);
       toast.success('Nova turma criada com sucesso!');
       reset();
       setIsOpen(false);
       onClassAdded();
     } catch (error) {
       console.error('Error creating class:', error);
-      toast.error('Erro ao criar nova turma. Verifique o console para mais detalhes.');
-    } finally {
-      setIsSubmitting(false);
+      toast.error('Erro ao criar nova turma. ' + error.message);
     }
   };
 
@@ -89,49 +95,49 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             <Label htmlFor="name">Nome da Turma</Label>
             <Input 
               id="name" 
-              {...register('name', { required: true })} 
+              {...register('name')} 
               className={errors.name ? 'border-red-500' : ''}
             />
-            {errors.name && <span className="text-sm text-red-500">Campo obrigatório</span>}
+            {errors.name && <span className="text-sm text-red-500">{errors.name.message}</span>}
           </div>
           <div>
             <Label htmlFor="instructor">Instrutor</Label>
             <Input 
               id="instructor" 
-              {...register('instructor', { required: true })}
+              {...register('instructor')}
               className={errors.instructor ? 'border-red-500' : ''}
             />
-            {errors.instructor && <span className="text-sm text-red-500">Campo obrigatório</span>}
+            {errors.instructor && <span className="text-sm text-red-500">{errors.instructor.message}</span>}
           </div>
           <div>
             <Label htmlFor="days">Dias (separados por vírgula)</Label>
             <Input 
               id="days" 
-              {...register('days', { required: true })} 
+              {...register('days')} 
               placeholder="Segunda, Quarta, Sexta"
               className={errors.days ? 'border-red-500' : ''}
             />
-            {errors.days && <span className="text-sm text-red-500">Campo obrigatório</span>}
+            {errors.days && <span className="text-sm text-red-500">{errors.days.message}</span>}
           </div>
           <div>
             <Label htmlFor="time">Horário</Label>
             <Input 
               id="time" 
-              {...register('time', { required: true })} 
+              {...register('time')} 
               placeholder="08:00 - 09:00"
               className={errors.time ? 'border-red-500' : ''}
             />
-            {errors.time && <span className="text-sm text-red-500">Campo obrigatório</span>}
+            {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
           </div>
           <div>
             <Label htmlFor="capacity">Capacidade</Label>
             <Input 
               type="number" 
               id="capacity" 
-              {...register('capacity', { required: true, min: 1 })}
+              {...register('capacity')}
               className={errors.capacity ? 'border-red-500' : ''}
             />
-            {errors.capacity && <span className="text-sm text-red-500">Campo obrigatório e deve ser maior que 0</span>}
+            {errors.capacity && <span className="text-sm text-red-500">{errors.capacity.message}</span>}
           </div>
           <Button type="submit" className="w-full" disabled={isSubmitting}>
             {isSubmitting ? 'Criando...' : 'Criar Turma'}
