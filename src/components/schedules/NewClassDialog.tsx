@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +18,6 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 
-// Validation schema for the new class form
 const newClassSchema = z.object({
   name: z.string().min(1, "Nome da turma é obrigatório"),
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
@@ -45,13 +43,11 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
 
   const onSubmit = async (data: NewClassFormData) => {
     try {
-      // Verificação direta da autenticação para exibir uma mensagem clara
       if (!isAuthenticated || !user) {
         toast.error("Você precisa estar logado para criar uma turma.");
         return;
       }
 
-      // Criar o objeto da nova turma
       const newClass = {
         name: data.name,
         instructor: data.instructor,
@@ -62,38 +58,21 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         status: 'active'
       };
 
-      console.log("Tentando criar nova turma:", newClass);
-      
-      // Usar fetch diretamente para evitar problemas com RLS
-      const supabaseUrl = 'https://vedrtlglkvzcdxdjjjgy.supabase.co';
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZlZHJ0bGdsa3Z6Y2R4ZGpqamd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ4MzQ0MzUsImV4cCI6MjA2MDQxMDQzNX0.PxGL1A2SVdaGRmMJFQscFiV9nymCzFdIwdReElW8TYU';
+      const { error } = await supabase
+        .from('schedules')
+        .insert(newClass);
 
-      console.log("Inserindo nova turma diretamente via API");
-      
-      // Use a more direct approach without checking for session
-      const response = await fetch(`${supabaseUrl}/rest/v1/schedules`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-          'Prefer': 'return=minimal'
-        },
-        body: JSON.stringify(newClass)
-      });
-      
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(`Erro na API: ${errorData}`);
+      if (error) {
+        console.error('Error creating class:', error);
+        throw new Error(error.message);
       }
-      
+
       toast.success('Nova turma criada com sucesso!');
       reset();
       setIsOpen(false);
       onClassAdded();
-      
-    } catch (error) {
-      console.error('Erro ao criar turma:', error);
+    } catch (error: any) {
+      console.error('Error creating class:', error);
       toast.error(`Erro ao criar nova turma: ${error.message}`);
     }
   };
