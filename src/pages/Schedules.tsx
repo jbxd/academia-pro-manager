@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/layouts/AppLayout";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -9,82 +10,59 @@ import { StatsCards } from "@/components/schedules/StatsCards";
 import { ScheduleList } from "@/components/schedules/ScheduleList";
 import { SearchBar } from "@/components/schedules/SearchBar";
 import { AnalyticsTab } from "@/components/schedules/AnalyticsTab";
+import { supabase } from "@/integrations/supabase/client";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import { NewClassDialog } from "@/components/schedules/NewClassDialog";
+import { FilterDialog, FilterOptions } from "@/components/schedules/FilterDialog";
 
 const Schedules = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
-  
-  // Convert schedules to state so we can modify it
-  const [schedules, setSchedules] = useState([
-    { 
-      id: "1", 
-      name: "Musculação", 
-      instructor: "André Silva",
-      days: ["Segunda", "Terça", "Quarta", "Quinta", "Sexta"], 
-      time: "06:00 - 22:00", 
-      capacity: 50,
-      current: 32,
-      status: "active" 
-    },
-    { 
-      id: "2", 
-      name: "Crossfit", 
-      instructor: "Carlos Mendes",
-      days: ["Segunda", "Quarta", "Sexta"], 
-      time: "07:00 - 08:00", 
-      capacity: 15,
-      current: 12,
-      status: "active" 
-    },
-    { 
-      id: "3", 
-      name: "Yoga", 
-      instructor: "Aline Costa",
-      days: ["Terça", "Quinta"], 
-      time: "08:00 - 09:00", 
-      capacity: 20,
-      current: 15,
-      status: "active" 
-    },
-    { 
-      id: "4", 
-      name: "Pilates", 
-      instructor: "Beatriz Lima",
-      days: ["Segunda", "Quarta", "Sexta"], 
-      time: "10:00 - 11:00", 
-      capacity: 12,
-      current: 10,
-      status: "active" 
-    },
-    { 
-      id: "5", 
-      name: "Spinning", 
-      instructor: "Fernando Oliveira",
-      days: ["Terça", "Quinta", "Sábado"], 
-      time: "18:00 - 19:00", 
-      capacity: 20,
-      current: 18,
-      status: "active" 
-    },
-  ]);
+  const [schedules, setSchedules] = useState([]);
+  const [filteredSchedules, setFilteredSchedules] = useState([]);
 
-  // Mock data for popular times
-  const popularTimes = [
-    { time: "18:00 - 19:00", days: "Segunda a Sexta", occupation: 95 },
-    { time: "19:00 - 20:00", days: "Segunda a Sexta", occupation: 90 },
-    { time: "17:00 - 18:00", days: "Segunda a Sexta", occupation: 85 },
-    { time: "10:00 - 11:00", days: "Sábado", occupation: 80 },
-  ];
-
-  const handleDelete = (scheduleId: string) => {
+  const fetchSchedules = async () => {
     try {
-      setSchedules(prevSchedules => prevSchedules.filter(schedule => schedule.id !== scheduleId));
+      const { data, error } = await supabase
+        .from('schedules')
+        .select('*');
+      
+      if (error) throw error;
+      
+      setSchedules(data);
+      setFilteredSchedules(data);
+    } catch (error) {
+      console.error('Error fetching schedules:', error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível carregar os horários.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchSchedules();
+  }, []);
+
+  const handleDelete = async (scheduleId: string) => {
+    try {
+      const { error } = await supabase
+        .from('schedules')
+        .delete()
+        .eq('id', scheduleId);
+
+      if (error) throw error;
+
       toast({
         title: "Horário excluído",
-        description: `O horário foi excluído com sucesso.`,
+        description: "O horário foi excluído com sucesso.",
       });
+      
+      fetchSchedules();
     } catch (error) {
       toast({
         title: "Erro ao excluir",
@@ -92,6 +70,31 @@ const Schedules = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleFilter = (filters: FilterOptions) => {
+    let filtered = [...schedules];
+
+    if (filters.instructor) {
+      filtered = filtered.filter(schedule => 
+        schedule.instructor.toLowerCase().includes(filters.instructor.toLowerCase())
+      );
+    }
+
+    if (filters.day) {
+      filtered = filtered.filter(schedule => 
+        schedule.days.includes(filters.day)
+      );
+    }
+
+    if (filters.status) {
+      filtered = filtered.filter(schedule => 
+        schedule.status === filters.status
+      );
+    }
+
+    setFilteredSchedules(filtered);
+    toast.success('Filtros aplicados');
   };
 
   return (
@@ -114,9 +117,15 @@ const Schedules = () => {
           </TabsList>
 
           <TabsContent value="classes" className="space-y-4">
-            <SearchBar isAdmin={isAdmin} />
+            <div className="flex flex-col md:flex-row gap-4 justify-between">
+              <div className="flex gap-2 w-full md:w-auto">
+                <Input placeholder="Buscar turma..." className="pl-8" />
+                <FilterDialog onFilter={handleFilter} />
+              </div>
+              <NewClassDialog onClassAdded={fetchSchedules} />
+            </div>
             <ScheduleList
-              schedules={schedules}
+              schedules={filteredSchedules}
               isAdmin={isAdmin}
               cardClasses={cardClasses}
               onDelete={handleDelete}

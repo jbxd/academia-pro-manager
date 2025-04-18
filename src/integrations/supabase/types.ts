@@ -179,6 +179,45 @@ export type Database = {
         }
         Relationships: []
       }
+      schedules: {
+        Row: {
+          capacity: number
+          created_at: string | null
+          current: number
+          days: string[]
+          id: string
+          instructor: string
+          name: string
+          status: string
+          time: string
+          updated_at: string | null
+        }
+        Insert: {
+          capacity: number
+          created_at?: string | null
+          current?: number
+          days: string[]
+          id?: string
+          instructor: string
+          name: string
+          status?: string
+          time: string
+          updated_at?: string | null
+        }
+        Update: {
+          capacity?: number
+          created_at?: string | null
+          current?: number
+          days?: string[]
+          id?: string
+          instructor?: string
+          name?: string
+          status?: string
+          time?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
