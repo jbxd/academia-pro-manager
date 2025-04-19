@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/layouts/AppLayout";
@@ -90,8 +91,9 @@ const Schedules = () => {
     }
     
     const filtered = schedules.filter(schedule => 
-      schedule.name.toLowerCase().includes(term) ||
-      schedule.instructor.toLowerCase().includes(term)
+      schedule.name?.toLowerCase().includes(term) ||
+      schedule.instructor?.toLowerCase().includes(term) ||
+      schedule.course_name?.toLowerCase().includes(term)
     );
     setFilteredSchedules(filtered);
   };
@@ -101,13 +103,13 @@ const Schedules = () => {
 
     if (filters.instructor) {
       filtered = filtered.filter(schedule => 
-        schedule.instructor.toLowerCase().includes(filters.instructor.toLowerCase())
+        schedule.instructor?.toLowerCase().includes(filters.instructor.toLowerCase())
       );
     }
 
     if (filters.day) {
       filtered = filtered.filter(schedule => 
-        schedule.days.includes(filters.day)
+        schedule.days?.includes(filters.day)
       );
     }
 
@@ -121,7 +123,7 @@ const Schedules = () => {
     toast("Filtros aplicados com sucesso");
   };
 
-  const handleDelete = async (scheduleId: string) => {
+  const handleDelete = async (scheduleId: string | number) => {
     try {
       const { error } = await supabase
         .from('schedules')

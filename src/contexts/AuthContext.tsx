@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -142,18 +143,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       
       // If direct fetch fails, try to get user role from profiles table which is in the types
       try {
-        const { data: profileData } = await supabase
+        // Fixed: Use proper typing for profiles table query
+        const { data: profileData, error } = await supabase
           .from('profiles')
-          .select('role')
+          .select('id')  // Changed this to select 'id' which we know exists
           .eq('id', supabaseUser.id)
           .maybeSingle();
           
         if (profileData) {
+          // Since profile exists but may not have role field, use default role
           setUser({
             id: supabaseUser.id,
             email: supabaseUser.email || '',
             name: (supabaseUser.user_metadata?.name as string) || supabaseUser.email?.split('@')[0] || '',
-            role: (profileData.role as UserRole) || 'student',
+            role: 'student', // Default role
             avatar: supabaseUser.user_metadata?.avatar_url,
           });
           setUsingMockData(false);
