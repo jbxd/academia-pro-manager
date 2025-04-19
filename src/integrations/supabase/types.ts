@@ -31,15 +31,7 @@ export type Database = {
           id?: string
           profile_id?: string
         }
-        Relationships: [
-          {
-            foreignKeyName: "attendance_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-        ]
+        Relationships: []
       }
       memberships: {
         Row: {
@@ -125,96 +117,74 @@ export type Database = {
             referencedRelation: "memberships"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "payments_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       profiles: {
         Row: {
-          active: boolean | null
-          birth_date: string | null
+          bio: string | null
           created_at: string | null
-          emergency_contact: string | null
-          first_name: string | null
-          id: string
-          last_name: string | null
-          notes: string | null
-          phone: string | null
-          preferred_payment_day: number | null
-          role: Database["public"]["Enums"]["user_role"] | null
-          updated_at: string | null
+          id: number
+          user_id: string | null
         }
         Insert: {
-          active?: boolean | null
-          birth_date?: string | null
+          bio?: string | null
           created_at?: string | null
-          emergency_contact?: string | null
-          first_name?: string | null
-          id: string
-          last_name?: string | null
-          notes?: string | null
-          phone?: string | null
-          preferred_payment_day?: number | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
+          id?: never
+          user_id?: string | null
         }
         Update: {
-          active?: boolean | null
-          birth_date?: string | null
+          bio?: string | null
           created_at?: string | null
-          emergency_contact?: string | null
-          first_name?: string | null
-          id?: string
-          last_name?: string | null
-          notes?: string | null
-          phone?: string | null
-          preferred_payment_day?: number | null
-          role?: Database["public"]["Enums"]["user_role"] | null
-          updated_at?: string | null
+          id?: never
+          user_id?: string | null
         }
         Relationships: []
       }
       schedules: {
         Row: {
-          capacity: number
+          capacity: number | null
+          course_name: string | null
           created_at: string | null
-          current: number
-          days: string[]
-          id: string
-          instructor: string
-          name: string
-          status: string
-          time: string
-          updated_at: string | null
+          current: number | null
+          days: string | null
+          end_time: string | null
+          id: number
+          instructor: string | null
+          name: string | null
+          start_time: string | null
+          status: string | null
+          time: string | null
+          user_id: string | null
         }
         Insert: {
-          capacity: number
+          capacity?: number | null
+          course_name?: string | null
           created_at?: string | null
-          current?: number
-          days: string[]
-          id?: string
-          instructor: string
-          name: string
-          status?: string
-          time: string
-          updated_at?: string | null
+          current?: number | null
+          days?: string | null
+          end_time?: string | null
+          id?: never
+          instructor?: string | null
+          name?: string | null
+          start_time?: string | null
+          status?: string | null
+          time?: string | null
+          user_id?: string | null
         }
         Update: {
-          capacity?: number
+          capacity?: number | null
+          course_name?: string | null
           created_at?: string | null
-          current?: number
-          days?: string[]
-          id?: string
-          instructor?: string
-          name?: string
-          status?: string
-          time?: string
-          updated_at?: string | null
+          current?: number | null
+          days?: string | null
+          end_time?: string | null
+          id?: never
+          instructor?: string | null
+          name?: string | null
+          start_time?: string | null
+          status?: string | null
+          time?: string | null
+          user_id?: string | null
         }
         Relationships: []
       }
