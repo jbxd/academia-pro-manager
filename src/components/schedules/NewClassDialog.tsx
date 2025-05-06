@@ -58,7 +58,6 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       console.log("Creating class with time range:", data.time);
       
       // Create the class object with time stored as text
-      // We'll only store the full time range as a text field in the database
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,

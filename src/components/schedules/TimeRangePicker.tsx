@@ -24,7 +24,7 @@ interface TimeRangePickerProps {
 export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Use only specific time ranges as requested
+  // Define the specific time ranges
   const timeRanges: TimeRange[] = [
     { value: "07:00-08:00", label: "07:00-08:00" },
     { value: "08:00-09:00", label: "08:00-09:00" },
@@ -43,9 +43,12 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
         <PopoverTrigger asChild>
           <Button
             variant="outline"
+            role="combobox"
+            aria-expanded={isOpen}
             className={`w-full justify-start text-left font-normal ${
               error ? 'border-red-500' : ''
             }`}
+            onClick={() => setIsOpen(!isOpen)}
           >
             <Clock className="mr-2 h-4 w-4" />
             {value ? value : "Selecione o horário"}
@@ -62,6 +65,7 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
                     variant={value === range.value ? "default" : "outline"}
                     className="w-full justify-start mb-1"
                     onClick={() => handleTimeRangeSelect(range.value)}
+                    type="button"
                   >
                     {range.label}
                   </Button>
