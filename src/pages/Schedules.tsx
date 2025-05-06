@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/layouts/AppLayout";
@@ -124,11 +125,14 @@ const Schedules = () => {
 
   const handleDelete = async (scheduleId: string | number) => {
     try {
-      // Use string for id when using eq
+      // Convert scheduleId to number if it's a string, since the database uses numbers for IDs
+      const numericId = typeof scheduleId === 'string' ? parseInt(scheduleId, 10) : scheduleId;
+      
+      // Use the numeric ID for the database operation
       const { error } = await supabase
         .from('schedules')
         .delete()
-        .eq('id', String(scheduleId));
+        .eq('id', numericId);
 
       if (error) throw error;
 
