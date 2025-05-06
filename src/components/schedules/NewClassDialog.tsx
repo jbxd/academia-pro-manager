@@ -18,6 +18,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
+import { TimeRangePicker } from "./TimeRangePicker";
 
 const newClassSchema = z.object({
   name: z.string().min(1, "Nome da turma é obrigatório"),
@@ -33,7 +34,9 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
   const { 
     register, 
     handleSubmit, 
-    reset, 
+    reset,
+    setValue,
+    watch,
     formState: { errors, isSubmitting } 
   } = useForm<NewClassFormData>({
     resolver: zodResolver(newClassSchema)
@@ -41,6 +44,9 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
 
   const [isOpen, setIsOpen] = React.useState(false);
   const { user, isAuthenticated } = useAuth();
+  
+  // Get the current time value from the form
+  const timeValue = watch("time");
 
   const onSubmit = async (data: NewClassFormData) => {
     try {
@@ -58,11 +64,10 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Set the time column explicitly as text, avoid any time conversion
+        // Store time as a plain string
         time: data.time
       };
 
-      // Remove the start_time and end_time fields completely
       const { error } = await supabase
         .from('schedules')
         .insert([newClass]);
@@ -127,15 +132,13 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             {errors.days && <span className="text-sm text-red-500">{errors.days.message}</span>}
           </div>
           <div>
-            <Label htmlFor="time">Horário (ex: 18:00-19:00)</Label>
-            <Input 
-              id="time" 
-              {...register('time')} 
-              placeholder="18:00-19:00"
-              className={errors.time ? 'border-red-500' : ''}
+            <Label htmlFor="time">Horário</Label>
+            <TimeRangePicker
+              value={timeValue}
+              onChange={(value) => setValue('time', value, { shouldValidate: true })}
+              error={!!errors.time}
             />
             {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
-            <span className="text-xs text-gray-500 mt-1">Digite o horário como texto (ex: 18:00-19:00)</span>
           </div>
           <div>
             <Label htmlFor="capacity">Capacidade</Label>

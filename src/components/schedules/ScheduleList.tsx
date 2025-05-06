@@ -7,13 +7,13 @@ import { Edit2, Trash2 } from "lucide-react";
 
 interface Schedule {
   id: string | number;
-  name: string;
+  course_name: string;
   instructor: string;
-  days: string[];
+  days: string;
   time: string;
   capacity: number;
   current: number;
-  status: string;
+  status?: string;
 }
 
 interface ScheduleListProps {
@@ -46,7 +46,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
         <Card key={schedule.id} className={cardClasses}>
           <CardHeader className="pb-2">
             <div className="flex justify-between items-center">
-              <CardTitle>{schedule.name}</CardTitle>
+              <CardTitle>{schedule.course_name}</CardTitle>
               {getCapacityBadge(schedule.current, schedule.capacity)}
             </div>
             <CardDescription className={isAdmin ? "text-gray-300" : ""}>
@@ -59,7 +59,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
                 <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>
                   Dias:
                 </span>
-                <span>{schedule.days.join(", ")}</span>
+                <span>{schedule.days}</span>
               </div>
               <div className="flex justify-between">
                 <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>
