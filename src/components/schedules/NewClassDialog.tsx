@@ -49,30 +49,16 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      const newClass: any = {
+      // Create the class object with simple string time field
+      const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Store time as a string
+        // Store time as a plain text string without any conversion
         time: data.time
       };
-
-      // Check if the format of the time has a dash (e.g. "18:00-19:00")
-      if (data.time.includes('-')) {
-        const [startTime, endTime] = data.time.split('-').map(t => t.trim());
-        
-        // Store the time string in the 'time' field
-        Object.assign(newClass, {
-          time: data.time
-        });
-      } else {
-        // If there's no dash, use it as the time
-        Object.assign(newClass, {
-          time: data.time
-        });
-      }
 
       // Use the typed version of from() to avoid TypeScript errors
       const { error } = await supabase
@@ -147,6 +133,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
               className={errors.time ? 'border-red-500' : ''}
             />
             {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
+            <span className="text-xs text-gray-500 mt-1">Digite o horário como texto (ex: 18:00-19:00)</span>
           </div>
           <div>
             <Label htmlFor="capacity">Capacidade</Label>
