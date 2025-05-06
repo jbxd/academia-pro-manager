@@ -32,7 +32,11 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
     { value: "19:00-20:00", label: "19:00 - 20:00" }
   ];
 
-  const handleTimeSelect = (timeRange: string) => {
+  const handleTimeSelect = (timeRange: string, e: React.MouseEvent) => {
+    // Stop event propagation to prevent clicks from passing through
+    e.preventDefault();
+    e.stopPropagation();
+    
     onChange(timeRange);
     setIsOpen(false);
   };
@@ -58,7 +62,12 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
               : "Selecione o horário"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-72 p-4" align="start">
+        <PopoverContent 
+          className="w-72 p-4" 
+          align="start" 
+          sideOffset={5}
+          style={{ zIndex: 100 }} // Ensure high z-index
+        >
           <Label className="mb-2 block font-medium">Horários disponíveis</Label>
           <ScrollArea className="h-60 pr-4">
             <div className="space-y-2">
@@ -67,7 +76,7 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
                   key={option.value}
                   variant={value === option.value ? "default" : "outline"}
                   className="w-full justify-start"
-                  onClick={() => handleTimeSelect(option.value)}
+                  onClick={(e) => handleTimeSelect(option.value, e)}
                   type="button"
                 >
                   {option.label}
