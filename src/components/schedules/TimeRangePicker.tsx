@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -10,7 +9,7 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
 
-interface TimeRange {
+interface TimeOption {
   value: string;
   label: string;
 }
@@ -24,17 +23,36 @@ interface TimeRangePickerProps {
 export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Define the specific time ranges
-  const timeRanges: TimeRange[] = [
-    { value: "07:00-08:00", label: "07:00-08:00" },
-    { value: "08:00-09:00", label: "08:00-09:00" },
-    { value: "18:00-19:00", label: "18:00-19:00" },
-    { value: "19:00-20:00", label: "19:00-20:00" }
+  // Parse the current value to get start and end times
+  const [startTime, endTime] = value ? value.split('-') : ['', ''];
+  
+  // Available time options
+  const timeOptions: TimeOption[] = [
+    { value: "07:00", label: "07:00" },
+    { value: "08:00", label: "08:00" },
+    { value: "18:00", label: "18:00" },
+    { value: "19:00", label: "19:00" },
+    { value: "20:00", label: "20:00" }
   ];
 
-  const handleTimeRangeSelect = (timeRange: string) => {
-    onChange(timeRange);
-    setIsOpen(false);
+  const handleStartTimeSelect = (start: string) => {
+    // If end time is already selected and valid, update the full range
+    if (endTime) {
+      onChange(`${start}-${endTime}`);
+    } else {
+      // Otherwise just update start time
+      onChange(`${start}-`);
+    }
+  };
+
+  const handleEndTimeSelect = (end: string) => {
+    // If start time is already selected and valid, update the full range
+    if (startTime) {
+      onChange(`${startTime}-${end}`);
+    } else {
+      // Otherwise just update end time
+      onChange(`-${end}`);
+    }
   };
 
   return (
@@ -51,27 +69,52 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
             onClick={() => setIsOpen(!isOpen)}
           >
             <Clock className="mr-2 h-4 w-4" />
-            {value ? value : "Selecione o horário"}
+            {value && value.includes('-') 
+              ? value 
+              : "Selecione o horário de início e fim"}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-72 p-0" align="start">
           <div className="p-4">
-            <Label className="mb-2 block">Horário da aula</Label>
-            <ScrollArea className="h-60 pr-4">
-              <div className="space-y-1">
-                {timeRanges.map((range) => (
-                  <Button
-                    key={range.value}
-                    variant={value === range.value ? "default" : "outline"}
-                    className="w-full justify-start mb-1"
-                    onClick={() => handleTimeRangeSelect(range.value)}
-                    type="button"
-                  >
-                    {range.label}
-                  </Button>
-                ))}
+            <div className="space-y-4">
+              <div>
+                <Label className="mb-2 block font-medium">Horário de início</Label>
+                <ScrollArea className="h-40 pr-4">
+                  <div className="space-y-1">
+                    {timeOptions.map((option) => (
+                      <Button
+                        key={`start-${option.value}`}
+                        variant={startTime === option.value ? "default" : "outline"}
+                        className="w-full justify-start mb-1"
+                        onClick={() => handleStartTimeSelect(option.value)}
+                        type="button"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
               </div>
-            </ScrollArea>
+              
+              <div>
+                <Label className="mb-2 block font-medium">Horário de término</Label>
+                <ScrollArea className="h-40 pr-4">
+                  <div className="space-y-1">
+                    {timeOptions.map((option) => (
+                      <Button
+                        key={`end-${option.value}`}
+                        variant={endTime === option.value ? "default" : "outline"}
+                        className="w-full justify-start mb-1"
+                        onClick={() => handleEndTimeSelect(option.value)}
+                        type="button"
+                      >
+                        {option.label}
+                      </Button>
+                    ))}
+                  </div>
+                </ScrollArea>
+              </div>
+            </div>
           </div>
         </PopoverContent>
       </Popover>
