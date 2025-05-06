@@ -40,24 +40,6 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
     }
   };
 
-  // Format time to display as a range (e.g. "08:00-09:00")
-  const formatTimeDisplay = (time: string) => {
-    if (!time) return "";
-    
-    // If time already contains a dash, it's already formatted correctly
-    if (time.includes('-')) return time;
-    
-    // If time is in format "HH:MM:SS", convert to "HH:MM"
-    const timeParts = time.split(':');
-    if (timeParts.length >= 2) {
-      const hour = parseInt(timeParts[0], 10);
-      const nextHour = (hour + 1) % 24;
-      return `${timeParts[0]}:${timeParts[1]}-${nextHour.toString().padStart(2, '0')}:${timeParts[1]}`;
-    }
-    
-    return time;
-  };
-
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
       {schedules.map((schedule) => (
@@ -83,7 +65,7 @@ export const ScheduleList: React.FC<ScheduleListProps> = ({
                 <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>
                   Horário:
                 </span>
-                <span>{formatTimeDisplay(schedule.time)}</span>
+                <span>{schedule.time}</span>
               </div>
               <div className="flex justify-between">
                 <span className={isAdmin ? "text-sm text-gray-300" : "text-sm text-muted-foreground"}>

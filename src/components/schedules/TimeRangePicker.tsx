@@ -24,19 +24,13 @@ interface TimeRangePickerProps {
 export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Generate time ranges with 1-hour intervals
-  const generateTimeRanges = (): TimeRange[] => {
-    const ranges: TimeRange[] = [];
-    for (let hour = 6; hour < 22; hour++) {
-      const startHour = hour.toString().padStart(2, '0');
-      const endHour = (hour + 1).toString().padStart(2, '0');
-      const timeRange = `${startHour}:00-${endHour}:00`;
-      ranges.push({ value: timeRange, label: timeRange });
-    }
-    return ranges;
-  };
-
-  const timeRanges = generateTimeRanges();
+  // Use only specific time ranges as requested
+  const timeRanges: TimeRange[] = [
+    { value: "07:00-08:00", label: "07:00-08:00" },
+    { value: "08:00-09:00", label: "08:00-09:00" },
+    { value: "18:00-19:00", label: "18:00-19:00" },
+    { value: "19:00-20:00", label: "19:00-20:00" }
+  ];
 
   const handleTimeRangeSelect = (timeRange: string) => {
     onChange(timeRange);
