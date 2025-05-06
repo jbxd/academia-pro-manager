@@ -49,21 +49,23 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      // Create the class object with simple string time field
+      console.log("Creating class with time as text:", data.time);
+      
+      // Create the class object with time stored as text
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Store time as a plain text string without any conversion
+        // Set the time column explicitly as text, avoid any time conversion
         time: data.time
       };
 
-      // Use the typed version of from() to avoid TypeScript errors
+      // Remove the start_time and end_time fields completely
       const { error } = await supabase
         .from('schedules')
-        .insert(newClass);
+        .insert([newClass]);
 
       if (error) {
         console.error('Error creating class:', error);
