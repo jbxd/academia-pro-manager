@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Edit2, Trash2 } from "lucide-react";
 
 interface Schedule {
-  id: string | number;  // Updated to accept both string and number types
+  id: string | number;
   name: string;
   instructor: string;
   days: string[];
@@ -20,7 +20,7 @@ interface ScheduleListProps {
   schedules: Schedule[];
   isAdmin: boolean;
   cardClasses: string;
-  onDelete: (id: string | number) => void;  // Updated to match the handler in Schedules.tsx
+  onDelete: (id: string | number) => void;
 }
 
 export const ScheduleList: React.FC<ScheduleListProps> = ({ 

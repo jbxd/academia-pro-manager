@@ -49,38 +49,33 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      // Em vez de enviar o campo time diretamente, vamos armazenar como string
-      // e separar os horários de início e fim
+      // Process time range
       let timeRange = data.time;
       
-      const newClass = {
+      const newClass: any = {
         course_name: data.name,
         instructor: data.instructor,
-        days: data.days, // O campo days na tabela já é texto
+        days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Em vez de enviar 'time', vamos usar start_time e end_time
-        // E converter apenas a parte do texto do horário, não o range
       };
 
-      // Verifica se o formato do horário tem um traço (ex: "18:00-19:00")
+      // Check if the format of the time has a dash (e.g. "18:00-19:00")
       if (timeRange.includes('-')) {
         const [startTime, endTime] = timeRange.split('-').map(t => t.trim());
         
-        // Adicionar os campos start_time e end_time corretamente
-        // Não enviamos como timestamp, apenas como texto para o campo correto
-        // O PostgreSQL tratará esse texto em seu formato próprio
         Object.assign(newClass, {
           start_time: startTime,
           end_time: endTime
         });
       } else {
-        // Se o formato não tiver um traço, usamos apenas como horário de início
+        // If there's no dash, use it as the start time
         Object.assign(newClass, {
           start_time: timeRange
         });
       }
 
+      // Use the typed version of from() to avoid TypeScript errors
       const { error } = await supabase
         .from('schedules')
         .insert(newClass);

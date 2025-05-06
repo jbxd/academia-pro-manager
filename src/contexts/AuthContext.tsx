@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -140,13 +141,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         console.error("Error fetching user data via REST:", fetchError);
       }
       
-      // If direct fetch fails, try to get user role from profiles table which is in the types
+      // If direct fetch fails, try to get user role from profiles table
       try {
-        // Fixed: Use proper typing for profiles table query
+        // Use the type-safe approach with the profiles table
         const { data: profileData, error } = await supabase
           .from('profiles')
-          .select('id')  // Changed this to select 'id' which we know exists
-          .eq('id', supabaseUser.id)
+          .select('id, bio')  // Select fields that actually exist in the profiles table
+          .eq('user_id', supabaseUser.id)  // Make sure to query by user_id which is the field in the profiles table
           .maybeSingle();
           
         if (profileData) {

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import AppLayout from "@/components/layouts/AppLayout";
@@ -40,10 +39,10 @@ const Schedules = () => {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin";
   const cardClasses = isAdmin ? "bg-black/40 text-white border-gray-700" : "";
-  const [schedules, setSchedules] = useState([]);
-  const [filteredSchedules, setFilteredSchedules] = useState([]);
+  const [schedules, setSchedules] = useState<any[]>([]);
+  const [filteredSchedules, setFilteredSchedules] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [activeTab, setActiveTab] = useState("classes");
 
@@ -64,7 +63,7 @@ const Schedules = () => {
       console.log("Schedules fetched:", data);
       setSchedules(data || []);
       setFilteredSchedules(data || []);
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error fetching schedules:', error);
       setError(error.message);
       toastNotification({
@@ -125,7 +124,7 @@ const Schedules = () => {
 
   const handleDelete = async (scheduleId: string | number) => {
     try {
-      // Fixed: Convert scheduleId to string for Supabase equality check
+      // Use string for id when using eq
       const { error } = await supabase
         .from('schedules')
         .delete()
@@ -139,7 +138,7 @@ const Schedules = () => {
       });
       
       fetchSchedules();
-    } catch (error) {
+    } catch (error: any) {
       toastNotification({
         title: "Erro ao excluir",
         description: "Não foi possível excluir o horário.",
