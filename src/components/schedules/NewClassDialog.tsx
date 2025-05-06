@@ -25,6 +25,8 @@ const newClassSchema = z.object({
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
   days: z.string().min(1, "Dias são obrigatórios"),
   time: z.string().min(1, "Horário é obrigatório"),
+  start_time: z.string().min(1, "Horário de início é obrigatório"),
+  end_time: z.string().min(1, "Horário de término é obrigatório"),
   capacity: z.coerce.number().min(1, "Capacidade deve ser maior que zero")
 });
 
@@ -39,7 +41,11 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
     watch,
     formState: { errors, isSubmitting } 
   } = useForm<NewClassFormData>({
-    resolver: zodResolver(newClassSchema)
+    resolver: zodResolver(newClassSchema),
+    defaultValues: {
+      start_time: "",
+      end_time: ""
+    }
   });
 
   const [isOpen, setIsOpen] = React.useState(false);
@@ -56,15 +62,19 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       }
 
       console.log("Creating class with time range:", data.time);
+      console.log("Start time:", data.start_time);
+      console.log("End time:", data.end_time);
       
-      // Create the class object with time stored as text
+      // Create the class object with separate start and end times
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        time: data.time  // Store the full time range as text
+        time: data.time,  // Still store the display value for reference
+        start_time: data.start_time, // Store the proper time format
+        end_time: data.end_time      // Store the proper time format
       };
 
       const { error } = await supabase
@@ -86,6 +96,13 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
     }
   };
 
+  // Handler for time range selection
+  const handleTimeRangeChange = (value: string, startTime: string, endTime: string) => {
+    setValue('time', value, { shouldValidate: true });
+    setValue('start_time', startTime, { shouldValidate: true });
+    setValue('end_time', endTime, { shouldValidate: true });
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -94,7 +111,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
           Nova Turma
         </Button>
       </DialogTrigger>
-      <DialogContent className="z-50">
+      <DialogContent className="z-50 max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Criar Nova Turma</DialogTitle>
           <DialogDescription>
@@ -134,11 +151,16 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             <Label htmlFor="time">Horário</Label>
             <TimeRangePicker
               value={timeValue}
-              onChange={(value) => setValue('time', value, { shouldValidate: true })}
+              onChange={handleTimeRangeChange}
               error={!!errors.time}
             />
             {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
           </div>
+          
+          {/* Hidden fields to store the actual time values */}
+          <input type="hidden" {...register('start_time')} />
+          <input type="hidden" {...register('end_time')} />
+          
           <div>
             <Label htmlFor="capacity">Capacidade</Label>
             <Input 

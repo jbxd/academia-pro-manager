@@ -13,27 +13,54 @@ import { Clock } from "lucide-react";
 interface TimeOption {
   value: string;
   label: string;
+  startTime: string;
+  endTime: string;
 }
 
 interface TimeRangePickerProps {
   value: string;
-  onChange: (value: string) => void;
+  onChange: (value: string, startTime: string, endTime: string) => void;
   error?: boolean;
 }
 
 export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Available time range options
+  // Available time range options with separate start and end times
   const timeOptions: TimeOption[] = [
-    { value: "07:00-08:00", label: "07:00 - 08:00" },
-    { value: "08:00-09:00", label: "08:00 - 09:00" },
-    { value: "18:00-19:00", label: "18:00 - 19:00" },
-    { value: "19:00-20:00", label: "19:00 - 20:00" }
+    { 
+      value: "07:00-08:00", 
+      label: "07:00 - 08:00",
+      startTime: "07:00:00",
+      endTime: "08:00:00" 
+    },
+    { 
+      value: "08:00-09:00", 
+      label: "08:00 - 09:00",
+      startTime: "08:00:00",
+      endTime: "09:00:00" 
+    },
+    { 
+      value: "18:00-19:00", 
+      label: "18:00 - 19:00",
+      startTime: "18:00:00",
+      endTime: "19:00:00" 
+    },
+    { 
+      value: "19:00-20:00", 
+      label: "19:00 - 20:00",
+      startTime: "19:00:00",
+      endTime: "20:00:00" 
+    }
   ];
 
-  const handleTimeSelect = (timeRange: string) => {
-    onChange(timeRange);
+  const handleTimeSelect = (option: TimeOption, e: React.MouseEvent) => {
+    // Prevent event propagation to fix click-through issues
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Pass both the display value and the separate start/end times
+    onChange(option.value, option.startTime, option.endTime);
     setIsOpen(false);
   };
 
@@ -76,7 +103,7 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
                     <Button
                       variant={value === option.value ? "default" : "outline"}
                       className="w-full justify-start"
-                      onClick={() => handleTimeSelect(option.value)}
+                      onClick={(e) => handleTimeSelect(option, e)}
                       type="button"
                       tabIndex={0}
                     >
