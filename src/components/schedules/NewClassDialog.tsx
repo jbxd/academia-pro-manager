@@ -23,9 +23,7 @@ const newClassSchema = z.object({
   name: z.string().min(1, "Nome da turma é obrigatório"),
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
   days: z.string().min(1, "Dias são obrigatórios"),
-  time: z.string()
-    .min(1, "Horário é obrigatório")
-    .regex(/^\d{4}-\d{4}$/, "Formato de horário inválido. Use apenas números no formato 1800-1900"),
+  time: z.string().min(1, "Horário é obrigatório"),
   capacity: z.coerce.number().min(1, "Capacidade deve ser maior que zero")
 });
 
@@ -57,9 +55,24 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Armazena o tempo apenas como string, sem conversão para timestamp
+        // Store time as a string
         time: data.time
       };
+
+      // Check if the format of the time has a dash (e.g. "18:00-19:00")
+      if (data.time.includes('-')) {
+        const [startTime, endTime] = data.time.split('-').map(t => t.trim());
+        
+        // Store the time string in the 'time' field
+        Object.assign(newClass, {
+          time: data.time
+        });
+      } else {
+        // If there's no dash, use it as the time
+        Object.assign(newClass, {
+          time: data.time
+        });
+      }
 
       // Use the typed version of from() to avoid TypeScript errors
       const { error } = await supabase
@@ -126,15 +139,14 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             {errors.days && <span className="text-sm text-red-500">{errors.days.message}</span>}
           </div>
           <div>
-            <Label htmlFor="time">Horário (ex: 1800-1900)</Label>
+            <Label htmlFor="time">Horário (ex: 18:00-19:00)</Label>
             <Input 
               id="time" 
               {...register('time')} 
-              placeholder="1800-1900"
+              placeholder="18:00-19:00"
               className={errors.time ? 'border-red-500' : ''}
             />
             {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
-            <span className="text-xs text-gray-500 mt-1">Use apenas números no formato 1800-1900 (sem dois pontos)</span>
           </div>
           <div>
             <Label htmlFor="capacity">Capacidade</Label>
