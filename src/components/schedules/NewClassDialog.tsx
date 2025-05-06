@@ -49,29 +49,29 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      // Process time range
-      let timeRange = data.time;
-      
       const newClass: any = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
+        // Use 'time' field to store the time value as a string instead of timestamp
+        time: data.time
       };
 
       // Check if the format of the time has a dash (e.g. "18:00-19:00")
-      if (timeRange.includes('-')) {
-        const [startTime, endTime] = timeRange.split('-').map(t => t.trim());
+      if (data.time.includes('-')) {
+        const [startTime, endTime] = data.time.split('-').map(t => t.trim());
         
+        // Store the time string in the 'time' field instead of using start_time/end_time
+        // This avoids the timestamp type issue
         Object.assign(newClass, {
-          start_time: startTime,
-          end_time: endTime
+          time: data.time
         });
       } else {
-        // If there's no dash, use it as the start time
+        // If there's no dash, use it as the time
         Object.assign(newClass, {
-          start_time: timeRange
+          time: data.time
         });
       }
 
