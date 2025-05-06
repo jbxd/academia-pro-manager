@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/popover";
 import { Clock } from "lucide-react";
 
-interface TimeOption {
+interface TimeRange {
   value: string;
   label: string;
 }
@@ -23,30 +23,22 @@ interface TimeRangePickerProps {
 export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   
-  // Generate time options in 30-minute intervals
-  const generateTimeOptions = (): TimeOption[] => {
-    const options: TimeOption[] = [];
-    for (let hour = 6; hour < 23; hour++) {
-      for (let minute of [0, 30]) {
-        const hourStr = hour.toString().padStart(2, '0');
-        const minuteStr = minute.toString().padStart(2, '0');
-        const timeStr = `${hourStr}:${minuteStr}`;
-        options.push({ value: timeStr, label: timeStr });
-      }
+  // Generate time ranges with 1-hour intervals
+  const generateTimeRanges = (): TimeRange[] => {
+    const ranges: TimeRange[] = [];
+    for (let hour = 6; hour < 22; hour++) {
+      const startHour = hour.toString().padStart(2, '0');
+      const endHour = (hour + 1).toString().padStart(2, '0');
+      const timeRange = `${startHour}:00-${endHour}:00`;
+      ranges.push({ value: timeRange, label: timeRange });
     }
-    return options;
+    return ranges;
   };
 
-  const timeOptions = generateTimeOptions();
-  
-  const [startTime, endTime] = value ? value.split('-') : ['', ''];
+  const timeRanges = generateTimeRanges();
 
-  const handleStartTimeSelect = (time: string) => {
-    onChange(`${time}-${endTime || ''}`.replace(/-$/, ''));
-  };
-
-  const handleEndTimeSelect = (time: string) => {
-    onChange(`${startTime || ''}-${time}`.replace(/^-/, ''));
+  const handleTimeRangeSelect = (timeRange: string) => {
+    onChange(timeRange);
     setIsOpen(false);
   };
 
@@ -64,38 +56,20 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
             {value ? value : "Selecione o horário"}
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-          <div className="p-4 grid grid-cols-2 gap-4">
-            <div>
-              <Label className="mb-2 block">Horário início</Label>
-              <div className="h-60 overflow-y-auto space-y-1 pr-2">
-                {timeOptions.map((option) => (
-                  <Button
-                    key={`start-${option.value}`}
-                    variant={startTime === option.value ? "default" : "outline"}
-                    className="w-full justify-start"
-                    onClick={() => handleStartTimeSelect(option.value)}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <Label className="mb-2 block">Horário fim</Label>
-              <div className="h-60 overflow-y-auto space-y-1 pr-2">
-                {timeOptions.map((option) => (
-                  <Button
-                    key={`end-${option.value}`}
-                    variant={endTime === option.value ? "default" : "outline"}
-                    className="w-full justify-start"
-                    onClick={() => handleEndTimeSelect(option.value)}
-                    disabled={startTime && option.value <= startTime}
-                  >
-                    {option.label}
-                  </Button>
-                ))}
-              </div>
+        <PopoverContent className="w-72 p-0" align="start">
+          <div className="p-4">
+            <Label className="mb-2 block">Horário da aula</Label>
+            <div className="h-60 overflow-y-auto space-y-1 pr-2">
+              {timeRanges.map((range) => (
+                <Button
+                  key={range.value}
+                  variant={value === range.value ? "default" : "outline"}
+                  className="w-full justify-start"
+                  onClick={() => handleTimeRangeSelect(range.value)}
+                >
+                  {range.label}
+                </Button>
+              ))}
             </div>
           </div>
         </PopoverContent>

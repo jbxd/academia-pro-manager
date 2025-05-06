@@ -55,7 +55,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      console.log("Creating class with time as text:", data.time);
+      console.log("Creating class with time range:", data.time);
       
       // Create the class object with time stored as text
       const newClass = {

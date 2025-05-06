@@ -36,15 +36,11 @@ const popularTimes = [
 interface SchedulesContentProps {
   isAdmin: boolean;
   cardClasses: string;
-  activeTab: string;
-  setActiveTab: (tab: string) => void;
 }
 
 export const SchedulesContent: React.FC<SchedulesContentProps> = ({ 
   isAdmin, 
   cardClasses, 
-  activeTab,
-  setActiveTab
 }) => {
   const { toast: toastNotification } = useToast();
   const [schedules, setSchedules] = useState<any[]>([]);
@@ -52,6 +48,7 @@ export const SchedulesContent: React.FC<SchedulesContentProps> = ({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
+  const [activeTab, setActiveTab] = useState("classes");
 
   const fetchSchedules = async () => {
     setLoading(true);
