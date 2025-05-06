@@ -57,14 +57,20 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
 
       console.log("Creating class with time range:", data.time);
       
-      // Create the class object with time stored as text
+      // Extract just the start time from the time range (e.g., "08:00" from "08:00-09:00")
+      let timeForStorage = data.time;
+      if (data.time.includes('-')) {
+        timeForStorage = data.time.split('-')[0];
+      }
+      
+      // Create the class object with time stored
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Store time as a plain string
+        // Store full time range format
         time: data.time
       };
 

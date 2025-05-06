@@ -7,6 +7,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Clock } from "lucide-react";
 
 interface TimeRange {
@@ -59,18 +60,20 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
         <PopoverContent className="w-72 p-0" align="start">
           <div className="p-4">
             <Label className="mb-2 block">Horário da aula</Label>
-            <div className="h-60 overflow-y-auto space-y-1 pr-2">
-              {timeRanges.map((range) => (
-                <Button
-                  key={range.value}
-                  variant={value === range.value ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={() => handleTimeRangeSelect(range.value)}
-                >
-                  {range.label}
-                </Button>
-              ))}
-            </div>
+            <ScrollArea className="h-60 pr-4">
+              <div className="space-y-1">
+                {timeRanges.map((range) => (
+                  <Button
+                    key={range.value}
+                    variant={value === range.value ? "default" : "outline"}
+                    className="w-full justify-start mb-1"
+                    onClick={() => handleTimeRangeSelect(range.value)}
+                  >
+                    {range.label}
+                  </Button>
+                ))}
+              </div>
+            </ScrollArea>
           </div>
         </PopoverContent>
       </Popover>
