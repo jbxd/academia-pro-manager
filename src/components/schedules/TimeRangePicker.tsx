@@ -32,11 +32,7 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
     { value: "19:00-20:00", label: "19:00 - 20:00" }
   ];
 
-  const handleTimeSelect = (timeRange: string, e: React.MouseEvent) => {
-    // Stop event propagation to prevent clicks from passing through
-    e.preventDefault();
-    e.stopPropagation();
-    
+  const handleTimeSelect = (timeRange: string) => {
     onChange(timeRange);
     setIsOpen(false);
   };
@@ -63,27 +59,34 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
           </Button>
         </PopoverTrigger>
         <PopoverContent 
-          className="w-72 p-4" 
+          className="w-72 p-0" 
           align="start" 
-          sideOffset={5}
-          style={{ zIndex: 100 }} // Ensure high z-index
+          sideOffset={8}
+          style={{ zIndex: 9999 }}
         >
-          <Label className="mb-2 block font-medium">Horários disponíveis</Label>
-          <ScrollArea className="h-60 pr-4">
-            <div className="space-y-2">
-              {timeOptions.map((option) => (
-                <Button
-                  key={option.value}
-                  variant={value === option.value ? "default" : "outline"}
-                  className="w-full justify-start"
-                  onClick={(e) => handleTimeSelect(option.value, e)}
-                  type="button"
-                >
-                  {option.label}
-                </Button>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="p-2">
+            <Label className="mb-2 block font-medium">Horários disponíveis</Label>
+            <ScrollArea className="h-60 rounded-md border">
+              <div className="p-2 space-y-1">
+                {timeOptions.map((option) => (
+                  <div 
+                    key={option.value}
+                    className="w-full"
+                  >
+                    <Button
+                      variant={value === option.value ? "default" : "outline"}
+                      className="w-full justify-start"
+                      onClick={() => handleTimeSelect(option.value)}
+                      type="button"
+                      tabIndex={0}
+                    >
+                      {option.label}
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
         </PopoverContent>
       </Popover>
     </div>

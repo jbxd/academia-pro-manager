@@ -94,7 +94,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
           Nova Turma
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="z-50">
         <DialogHeader>
           <DialogTitle>Criar Nova Turma</DialogTitle>
           <DialogDescription>
