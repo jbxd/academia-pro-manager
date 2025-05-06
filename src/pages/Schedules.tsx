@@ -125,10 +125,11 @@ const Schedules = () => {
 
   const handleDelete = async (scheduleId: string | number) => {
     try {
+      // Fixed: Convert scheduleId to string for Supabase equality check
       const { error } = await supabase
         .from('schedules')
         .delete()
-        .eq('id', scheduleId);
+        .eq('id', String(scheduleId));
 
       if (error) throw error;
 

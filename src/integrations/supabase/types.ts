@@ -9,198 +9,16 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      attendance: {
-        Row: {
-          check_in: string
-          check_out: string | null
-          created_at: string | null
-          id: string
-          profile_id: string
-        }
-        Insert: {
-          check_in?: string
-          check_out?: string | null
-          created_at?: string | null
-          id?: string
-          profile_id: string
-        }
-        Update: {
-          check_in?: string
-          check_out?: string | null
-          created_at?: string | null
-          id?: string
-          profile_id?: string
-        }
-        Relationships: []
-      }
-      memberships: {
-        Row: {
-          active: boolean | null
-          created_at: string | null
-          description: string | null
-          duration_days: number
-          id: string
-          name: string
-          price: number
-          updated_at: string | null
-        }
-        Insert: {
-          active?: boolean | null
-          created_at?: string | null
-          description?: string | null
-          duration_days: number
-          id?: string
-          name: string
-          price: number
-          updated_at?: string | null
-        }
-        Update: {
-          active?: boolean | null
-          created_at?: string | null
-          description?: string | null
-          duration_days?: number
-          id?: string
-          name?: string
-          price?: number
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
-      payments: {
-        Row: {
-          amount: number
-          created_at: string | null
-          due_date: string
-          id: string
-          membership_id: string
-          notes: string | null
-          paid_at: string | null
-          payment_method: string | null
-          profile_id: string
-          status: Database["public"]["Enums"]["payment_status"] | null
-          transaction_id: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          amount: number
-          created_at?: string | null
-          due_date: string
-          id?: string
-          membership_id: string
-          notes?: string | null
-          paid_at?: string | null
-          payment_method?: string | null
-          profile_id: string
-          status?: Database["public"]["Enums"]["payment_status"] | null
-          transaction_id?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          amount?: number
-          created_at?: string | null
-          due_date?: string
-          id?: string
-          membership_id?: string
-          notes?: string | null
-          paid_at?: string | null
-          payment_method?: string | null
-          profile_id?: string
-          status?: Database["public"]["Enums"]["payment_status"] | null
-          transaction_id?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "payments_membership_id_fkey"
-            columns: ["membership_id"]
-            isOneToOne: false
-            referencedRelation: "memberships"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      profiles: {
-        Row: {
-          bio: string | null
-          created_at: string | null
-          id: number
-          user_id: string | null
-        }
-        Insert: {
-          bio?: string | null
-          created_at?: string | null
-          id?: never
-          user_id?: string | null
-        }
-        Update: {
-          bio?: string | null
-          created_at?: string | null
-          id?: never
-          user_id?: string | null
-        }
-        Relationships: []
-      }
-      schedules: {
-        Row: {
-          capacity: number | null
-          course_name: string | null
-          created_at: string | null
-          current: number | null
-          days: string | null
-          end_time: string | null
-          id: number
-          instructor: string | null
-          name: string | null
-          start_time: string | null
-          status: string | null
-          time: string | null
-          user_id: string | null
-        }
-        Insert: {
-          capacity?: number | null
-          course_name?: string | null
-          created_at?: string | null
-          current?: number | null
-          days?: string | null
-          end_time?: string | null
-          id?: never
-          instructor?: string | null
-          name?: string | null
-          start_time?: string | null
-          status?: string | null
-          time?: string | null
-          user_id?: string | null
-        }
-        Update: {
-          capacity?: number | null
-          course_name?: string | null
-          created_at?: string | null
-          current?: number | null
-          days?: string | null
-          end_time?: string | null
-          id?: never
-          instructor?: string | null
-          name?: string | null
-          start_time?: string | null
-          status?: string | null
-          time?: string | null
-          user_id?: string | null
-        }
-        Relationships: []
-      }
+      [_ in never]: never
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      get_user_role: {
-        Args: { user_id: string }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
-      payment_status: "paid" | "pending" | "overdue" | "cancelled"
-      user_role: "admin" | "staff" | "member"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never
@@ -315,9 +133,6 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {
-      payment_status: ["paid", "pending", "overdue", "cancelled"],
-      user_role: ["admin", "staff", "member"],
-    },
+    Enums: {},
   },
 } as const
