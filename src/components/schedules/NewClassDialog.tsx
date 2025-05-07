@@ -20,13 +20,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useAuth } from "@/contexts/AuthContext";
 import { TimeRangePicker } from "./TimeRangePicker";
 
+// Custom validator for time format (HH:MM)
+const timeFormatRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+const validateTimeFormat = (value: string) => 
+  timeFormatRegex.test(value) || "Formato inválido. Use HH:MM (ex: 19:00)";
+
 const newClassSchema = z.object({
   name: z.string().min(1, "Nome da turma é obrigatório"),
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
   days: z.string().min(1, "Dias são obrigatórios"),
   time: z.string().min(1, "Horário é obrigatório").optional(),
-  start_time: z.string().min(1, "Horário de início é obrigatório"),
-  end_time: z.string().min(1, "Horário de término é obrigatório"),
+  start_time: z.string().min(1, "Horário de início é obrigatório").refine(validateTimeFormat),
+  end_time: z.string().min(1, "Horário de término é obrigatório").refine(validateTimeFormat),
   capacity: z.coerce.number().min(1, "Capacidade deve ser maior que zero")
 });
 
