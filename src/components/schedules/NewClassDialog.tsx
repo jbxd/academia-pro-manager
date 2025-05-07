@@ -65,19 +65,18 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       console.log("Start time:", data.start_time);
       console.log("End time:", data.end_time);
       
-      // Format the time display string instead of using timestamps with timezones
+      // Format the display time string
       const displayTime = `${data.start_time}-${data.end_time}`;
       
-      // Create the class object without timestamp fields
+      // Create the class object with all fields as text strings
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        // Store just the string representation of time
         time: displayTime,
-        // Store as string types instead of actual timestamps
+        // Store simple time strings
         start_time: data.start_time,
         end_time: data.end_time
       };

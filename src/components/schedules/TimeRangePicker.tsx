@@ -28,10 +28,8 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
     
     if (newStartTime && endTime) {
       const timeValue = `${newStartTime}-${endTime}`;
-      // Format for DB storage (add seconds)
-      const formattedStart = newStartTime.includes(":00") ? newStartTime : `${newStartTime}:00`;
-      const formattedEnd = endTime.includes(":00") ? endTime : `${endTime}:00`;
-      onChange(timeValue, formattedStart, formattedEnd);
+      // Pass the simple time strings without any extra formatting
+      onChange(timeValue, newStartTime, endTime);
     }
   };
 
@@ -41,10 +39,8 @@ export function TimeRangePicker({ value, onChange, error }: TimeRangePickerProps
     
     if (startTime && newEndTime) {
       const timeValue = `${startTime}-${newEndTime}`;
-      // Format for DB storage (add seconds)
-      const formattedStart = startTime.includes(":00") ? startTime : `${startTime}:00`;
-      const formattedEnd = newEndTime.includes(":00") ? newEndTime : `${newEndTime}:00`;
-      onChange(timeValue, formattedStart, formattedEnd);
+      // Pass the simple time strings without any extra formatting
+      onChange(timeValue, startTime, newEndTime);
     }
   };
 
