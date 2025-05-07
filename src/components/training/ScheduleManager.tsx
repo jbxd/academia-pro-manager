@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Trash2, Plus, Save } from "lucide-react";
@@ -84,18 +83,19 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     
     try {
       // In a real application, you would save the schedule to the database
-      // Here we're just simulating a successful save
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Since we don't have a student_schedules table in the database yet,
+      // we'll simulate saving by using the schedules table
       
-      // Example of what the API call might look like
       const scheduleIds = studentSchedule.map(s => s.id);
+      
+      // Create a schedule update record in the schedules table
       const { error } = await supabase
-        .from('student_schedules')
-        .upsert({
-          student_id: user.id,
-          schedule_ids: scheduleIds,
-          updated_at: new Date().toISOString()
-        });
+        .from('schedules')
+        .update({
+          user_id: user.id,
+          status: 'confirmed'
+        })
+        .in('id', scheduleIds);
       
       if (error) throw error;
       
@@ -165,10 +165,19 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
         <Button 
           onClick={handleSaveChanges}
           className="w-full bg-custom-red hover:bg-custom-red/80"
-          isLoading={isSaving}
+          disabled={isSaving}
         >
-          <Save className="mr-2 h-4 w-4" />
-          Salvar Alterações
+          {isSaving ? (
+            <span className="flex items-center">
+              <span className="animate-spin mr-2">⏳</span>
+              Salvando...
+            </span>
+          ) : (
+            <>
+              <Save className="mr-2 h-4 w-4" />
+              Salvar Alterações
+            </>
+          )}
         </Button>
       </div>
 

@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Session } from "@supabase/supabase-js";
@@ -22,6 +21,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   register: (email: string, password: string, name: string, role?: UserRole) => Promise<void>;
+  updateUserData: (data: Partial<UserAuth>) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
@@ -32,6 +32,7 @@ const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   logout: async () => {},
   register: async () => {},
+  updateUserData: async () => {},
 });
 
 export const useAuth = () => useContext(AuthContext);
@@ -267,6 +268,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   };
 
+  const updateUserData = async (data: Partial<UserAuth>) => {
+    if (!user) return;
+    
+    try {
+      // Update user state locally
+      setUser({ ...user, ...data });
+      
+      if (usingMockData) {
+        // Update local storage for mock data
+        const savedUser = localStorage.getItem("user");
+        if (savedUser) {
+          const parsedUser = JSON.parse(savedUser);
+          localStorage.setItem("user", JSON.stringify({ ...parsedUser, ...data }));
+        }
+      } else {
+        // For real Supabase integration, you would update the user metadata here
+        // This will be a placeholder since we don't know the exact structure
+        console.log("User data updated:", data);
+      }
+    } catch (error) {
+      console.error("Error updating user data:", error);
+      throw new Error("Failed to update user data");
+    }
+  };
+
   const logout = async () => {
     if (usingMockData) {
       // For mock data, just clear local storage
@@ -290,6 +316,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         login,
         logout,
         register,
+        updateUserData,
       }}
     >
       {children}

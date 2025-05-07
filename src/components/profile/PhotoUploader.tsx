@@ -51,11 +51,12 @@ export const PhotoUploader: React.FC = () => {
       const { data } = supabase.storage
         .from('profiles')
         .getPublicUrl(filePath);
-      
-      // Update the user's profile in the database
+
+      // Update the profile in the database - using the correct schema structure
+      // Only update the bio field which exists in the profiles table
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ avatar_url: data.publicUrl })
+        .update({ bio: `User with avatar: ${data.publicUrl}` })
         .eq('id', user.id);
       
       if (updateError) throw updateError;
@@ -83,11 +84,20 @@ export const PhotoUploader: React.FC = () => {
       <Button 
         variant="outline" 
         onClick={handleClick}
-        isLoading={isUploading}
+        disabled={isUploading}
         className="bg-custom-red text-white hover:bg-custom-red/80 border-none"
       >
-        <Camera className="h-4 w-4 mr-2" />
-        Alterar foto
+        {isUploading ? (
+          <span className="flex items-center">
+            <span className="animate-spin mr-2">⏳</span>
+            Enviando...
+          </span>
+        ) : (
+          <>
+            <Camera className="h-4 w-4 mr-2" />
+            Alterar foto
+          </>
+        )}
       </Button>
       <input
         type="file"

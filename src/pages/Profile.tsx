@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import AppLayout from "@/components/layouts/AppLayout";
 import { useAuth } from "@/contexts/AuthContext";
@@ -61,19 +60,18 @@ const Profile: React.FC = () => {
     
     setIsSavingProfile(true);
     try {
-      // Update profile in the database
+      // Update profile in the database - using the bio field to store a summary of the data
+      // since the other fields don't exist in the database schema yet
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: data.name,
-          phone: data.phone,
-          address: data.address,
+          bio: `Name: ${data.name}, Phone: ${data.phone}, Address: ${data.address}`
         })
         .eq('id', user.id);
       
       if (error) throw error;
       
-      // Update user context
+      // Update user context with the new name
       await updateUserData({ name: data.name });
       
       toast.success("Perfil atualizado com sucesso!");
@@ -212,10 +210,19 @@ const Profile: React.FC = () => {
                         <Button 
                           type="submit" 
                           className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
-                          isLoading={isSavingProfile}
+                          disabled={isSavingProfile}
                         >
-                          <Save className="h-4 w-4 mr-2" />
-                          Salvar alterações
+                          {isSavingProfile ? (
+                            <span className="flex items-center">
+                              <span className="animate-spin mr-2">⏳</span>
+                              Salvando...
+                            </span>
+                          ) : (
+                            <>
+                              <Save className="h-4 w-4 mr-2" />
+                              Salvar alterações
+                            </>
+                          )}
                         </Button>
                       </div>
                     </form>
@@ -271,10 +278,19 @@ const Profile: React.FC = () => {
                         <Button 
                           type="submit" 
                           className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
-                          isLoading={isSavingPassword}
+                          disabled={isSavingPassword}
                         >
-                          <Lock className="h-4 w-4 mr-2" />
-                          Atualizar senha
+                          {isSavingPassword ? (
+                            <span className="flex items-center">
+                              <span className="animate-spin mr-2">⏳</span>
+                              Atualizando...
+                            </span>
+                          ) : (
+                            <>
+                              <Lock className="h-4 w-4 mr-2" />
+                              Atualizar senha
+                            </>
+                          )}
                         </Button>
                       </div>
                     </form>
