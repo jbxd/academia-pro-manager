@@ -52,12 +52,13 @@ export const PhotoUploader: React.FC = () => {
         .from('profiles')
         .getPublicUrl(filePath);
 
-      // Update the profile in the database - using the correct schema structure
-      // Only update the bio field which exists in the profiles table
+      // Update the profile in the database
+      // The profiles table has integer id field, not UUID type
+      // Just save the avatar URL in the bio field since we don't have a proper avatar field
       const { error: updateError } = await supabase
         .from('profiles')
         .update({ bio: `User with avatar: ${data.publicUrl}` })
-        .eq('id', user.id);
+        .eq('user_id', user.id); // Use user_id instead of id field
       
       if (updateError) throw updateError;
       

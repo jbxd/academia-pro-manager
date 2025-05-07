@@ -60,14 +60,15 @@ const Profile: React.FC = () => {
     
     setIsSavingProfile(true);
     try {
-      // Update profile in the database - using the bio field to store a summary of the data
-      // since the other fields don't exist in the database schema yet
+      // Update profile in the database
+      // Using user_id field which is UUID, and the bio field to store info since
+      // we don't have other fields in the database schema
       const { error } = await supabase
         .from('profiles')
         .update({
           bio: `Name: ${data.name}, Phone: ${data.phone}, Address: ${data.address}`
         })
-        .eq('id', user.id);
+        .eq('user_id', user.id); // Use user_id instead of id
       
       if (error) throw error;
       

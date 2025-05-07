@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CalendarDays, Trash2, Plus, Save } from "lucide-react";
@@ -82,13 +83,11 @@ export const ScheduleManager: React.FC<ScheduleManagerProps> = ({
     setIsSaving(true);
     
     try {
-      // In a real application, you would save the schedule to the database
-      // Since we don't have a student_schedules table in the database yet,
-      // we'll simulate saving by using the schedules table
+      // Get the schedule ids (which are numeric in the database)
+      // Make sure we parse them to numbers as the database expects
+      const scheduleIds = studentSchedule.map(s => parseInt(s.id, 10));
       
-      const scheduleIds = studentSchedule.map(s => s.id);
-      
-      // Create a schedule update record in the schedules table
+      // Update the schedules to be associated with this user
       const { error } = await supabase
         .from('schedules')
         .update({
