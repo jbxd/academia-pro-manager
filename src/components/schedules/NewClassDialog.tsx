@@ -82,7 +82,8 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        time: data.time || `${data.start_time}-${data.end_time}`,  // Still store the display value for reference
+        // Store the display time value in a format that won't cause timezone issues
+        time: `${data.start_time}-${data.end_time}`,
         start_time: formattedStartTime, // Store the proper timestamp format
         end_time: formattedEndTime     // Store the proper timestamp format
       };
