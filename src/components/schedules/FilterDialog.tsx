@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -7,6 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,7 +18,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Filter } from "lucide-react";
+import { Filter, X } from "lucide-react";
+import { toast } from "sonner";
 
 interface FilterDialogProps {
   onFilter: (filters: FilterOptions) => void;
@@ -31,18 +33,43 @@ export interface FilterOptions {
 }
 
 export const FilterDialog: React.FC<FilterDialogProps> = ({ onFilter }) => {
-  const [filters, setFilters] = React.useState<FilterOptions>({});
+  const [open, setOpen] = useState(false);
+  const [filters, setFilters] = useState<FilterOptions>({});
+  const [activeFilters, setActiveFilters] = useState<FilterOptions>({});
+  const [filtersApplied, setFiltersApplied] = useState(false);
 
   const handleFilter = () => {
     onFilter(filters);
+    setActiveFilters({...filters});
+    setFiltersApplied(true);
+    setOpen(false);
+    toast.success("Filtros aplicados com sucesso");
+  };
+
+  const handleClearFilters = () => {
+    const emptyFilters = {};
+    setFilters(emptyFilters);
+    setActiveFilters(emptyFilters);
+    onFilter(emptyFilters);
+    setFiltersApplied(false);
+    toast.info("Filtros removidos");
+  };
+
+  const countActiveFilters = () => {
+    return Object.values(activeFilters).filter(Boolean).length;
   };
 
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="relative">
           <Filter className="h-4 w-4 mr-2" />
           Filtrar
+          {filtersApplied && countActiveFilters() > 0 && (
+            <span className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full w-5 h-5 text-xs flex items-center justify-center">
+              {countActiveFilters()}
+            </span>
+          )}
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -68,6 +95,7 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({ onFilter }) => {
                 <SelectValue placeholder="Selecione o dia" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Todos os dias</SelectItem>
                 <SelectItem value="Segunda">Segunda</SelectItem>
                 <SelectItem value="Terça">Terça</SelectItem>
                 <SelectItem value="Quarta">Quarta</SelectItem>
@@ -88,14 +116,31 @@ export const FilterDialog: React.FC<FilterDialogProps> = ({ onFilter }) => {
                 <SelectValue placeholder="Selecione o status" />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Todos os status</SelectItem>
                 <SelectItem value="active">Ativo</SelectItem>
                 <SelectItem value="inactive">Inativo</SelectItem>
+                <SelectItem value="full">Lotado</SelectItem>
+                <SelectItem value="available">Disponível</SelectItem>
               </SelectContent>
             </Select>
           </div>
-          <Button className="w-full" onClick={handleFilter}>
-            Aplicar Filtros
-          </Button>
+          <DialogFooter className="flex gap-2 pt-4">
+            <Button 
+              variant="outline" 
+              onClick={handleClearFilters}
+              className="flex-1"
+            >
+              <X className="h-4 w-4 mr-2" />
+              Limpar Filtros
+            </Button>
+            <Button 
+              onClick={handleFilter}
+              className="flex-1"
+            >
+              <Filter className="h-4 w-4 mr-2" />
+              Aplicar Filtros
+            </Button>
+          </DialogFooter>
         </div>
       </DialogContent>
     </Dialog>
