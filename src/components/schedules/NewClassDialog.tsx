@@ -24,7 +24,7 @@ const newClassSchema = z.object({
   name: z.string().min(1, "Nome da turma é obrigatório"),
   instructor: z.string().min(1, "Nome do instrutor é obrigatório"),
   days: z.string().min(1, "Dias são obrigatórios"),
-  time: z.string().min(1, "Horário é obrigatório"),
+  time: z.string().min(1, "Horário é obrigatório").optional(),
   start_time: z.string().min(1, "Horário de início é obrigatório"),
   end_time: z.string().min(1, "Horário de término é obrigatório"),
   capacity: z.coerce.number().min(1, "Capacidade deve ser maior que zero")
@@ -52,7 +52,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
   const { user, isAuthenticated } = useAuth();
   
   // Get the current time value from the form
-  const timeValue = watch("time");
+  const timeValue = watch("time") || "";
 
   const onSubmit = async (data: NewClassFormData) => {
     try {
@@ -61,7 +61,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         return;
       }
 
-      console.log("Creating class with time range:", data.time);
+      console.log("Creating class with time range:", data.time || "");
       console.log("Start time:", data.start_time);
       console.log("End time:", data.end_time);
       
@@ -72,7 +72,7 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        time: data.time,  // Still store the display value for reference
+        time: data.time || `${data.start_time}-${data.end_time}`,  // Still store the display value for reference
         start_time: data.start_time, // Store the proper time format
         end_time: data.end_time      // Store the proper time format
       };
@@ -152,9 +152,11 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
             <TimeRangePicker
               value={timeValue}
               onChange={handleTimeRangeChange}
-              error={!!errors.time}
+              error={!!errors.time || !!errors.start_time || !!errors.end_time}
             />
             {errors.time && <span className="text-sm text-red-500">{errors.time.message}</span>}
+            {errors.start_time && <span className="text-sm text-red-500">{errors.start_time.message}</span>}
+            {errors.end_time && <span className="text-sm text-red-500">{errors.end_time.message}</span>}
           </div>
           
           {/* Hidden fields to store the actual time values */}
