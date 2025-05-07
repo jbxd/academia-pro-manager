@@ -65,6 +65,16 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       console.log("Start time:", data.start_time);
       console.log("End time:", data.end_time);
       
+      // Format dates correctly for PostgreSQL timestamp with time zone
+      // We need to create a full datetime string with today's date
+      const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+      
+      const formattedStartTime = `${today}T${data.start_time}:00`;
+      const formattedEndTime = `${today}T${data.end_time}:00`;
+      
+      console.log("Formatted start time:", formattedStartTime);
+      console.log("Formatted end time:", formattedEndTime);
+
       // Create the class object with separate start and end times
       const newClass = {
         course_name: data.name,
@@ -73,8 +83,8 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
         capacity: data.capacity,
         current: 0,
         time: data.time || `${data.start_time}-${data.end_time}`,  // Still store the display value for reference
-        start_time: data.start_time, // Store the proper time format
-        end_time: data.end_time      // Store the proper time format
+        start_time: formattedStartTime, // Store the proper timestamp format
+        end_time: formattedEndTime     // Store the proper timestamp format
       };
 
       const { error } = await supabase
