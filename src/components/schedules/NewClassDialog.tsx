@@ -70,20 +70,19 @@ export const NewClassDialog = ({ onClassAdded }: { onClassAdded: () => void }) =
       console.log("Start time:", data.start_time);
       console.log("End time:", data.end_time);
       
-      // Format the display time string
-      const displayTime = `${data.start_time}-${data.end_time}`;
-      
       // Create the class object with all fields as text strings
+      // Important: DO NOT use the hyphenated time format for the "time" field in the database
       const newClass = {
         course_name: data.name,
         instructor: data.instructor,
         days: data.days,
         capacity: data.capacity,
         current: 0,
-        time: displayTime,
-        // Store simple time strings
+        // Store the individual time values separately
         start_time: data.start_time,
-        end_time: data.end_time
+        end_time: data.end_time,
+        // For display purposes only, not used for time calculations
+        time: data.start_time
       };
 
       const { error } = await supabase
