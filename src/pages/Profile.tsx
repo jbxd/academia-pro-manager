@@ -6,62 +6,109 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "sonner";
-import { Camera, Save, Lock } from "lucide-react";
+import { Save, Lock } from "lucide-react";
+import { PhotoUploader } from "@/components/profile/PhotoUploader";
+import { supabase } from "@/integrations/supabase/client";
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+const profileSchema = z.object({
+  name: z.string().min(2, "Nome deve ter pelo menos 2 caracteres"),
+  email: z.string().email("Email inválido"),
+  phone: z.string().optional(),
+  address: z.string().optional(),
+});
+
+const passwordSchema = z.object({
+  currentPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  newPassword: z.string().min(6, "Senha deve ter pelo menos 6 caracteres"),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "As senhas não conferem",
+  path: ["confirmPassword"],
+});
 
 const Profile: React.FC = () => {
-  const { user } = useAuth();
+  const { user, updateUserData } = useAuth();
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [isSavingPassword, setIsSavingPassword] = useState(false);
   
-  const [formData, setFormData] = useState({
-    name: user?.name || "",
-    email: user?.email || "",
-    phone: "(11) 98765-4321",
-    address: "Av. Paulista, 1000, São Paulo - SP",
+  const profileForm = useForm<z.infer<typeof profileSchema>>({
+    resolver: zodResolver(profileSchema),
+    defaultValues: {
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: "(11) 98765-4321", // Default values for demo
+      address: "Av. Paulista, 1000, São Paulo - SP", // Default values for demo
+    },
   });
   
-  const [passwordData, setPasswordData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-  
-  const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setPasswordData(prev => ({ ...prev, [name]: value }));
-  };
-  
-  const handleProfileSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    toast.success("Perfil atualizado com sucesso!");
-  };
-  
-  const handlePasswordSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error("As senhas não conferem");
-      return;
-    }
-    toast.success("Senha atualizada com sucesso!");
-    setPasswordData({
+  const passwordForm = useForm<z.infer<typeof passwordSchema>>({
+    resolver: zodResolver(passwordSchema),
+    defaultValues: {
       currentPassword: "",
       newPassword: "",
       confirmPassword: "",
-    });
-  };
-
-  const handleChangePhoto = () => {
-    toast.success("Funcionalidade de alteração de foto ativada!");
-    // Here you would typically open a file dialog
-    // For this example, we'll just show a toast notification
+    },
+  });
+  
+  const handleProfileSubmit = async (data: z.infer<typeof profileSchema>) => {
+    if (!user) return;
+    
+    setIsSavingProfile(true);
+    try {
+      // Update profile in the database
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: data.name,
+          phone: data.phone,
+          address: data.address,
+        })
+        .eq('id', user.id);
+      
+      if (error) throw error;
+      
+      // Update user context
+      await updateUserData({ name: data.name });
+      
+      toast.success("Perfil atualizado com sucesso!");
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Erro ao atualizar o perfil. Tente novamente.");
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
   
+  const handlePasswordSubmit = async (data: z.infer<typeof passwordSchema>) => {
+    setIsSavingPassword(true);
+    try {
+      // Update the user's password
+      const { error } = await supabase.auth.updateUser({
+        password: data.newPassword,
+      });
+      
+      if (error) throw error;
+      
+      toast.success("Senha atualizada com sucesso!");
+      passwordForm.reset({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: "",
+      });
+    } catch (error: any) {
+      console.error("Error updating password:", error);
+      toast.error(error.message || "Erro ao atualizar a senha. Tente novamente.");
+    } finally {
+      setIsSavingPassword(false);
+    }
+  };
+
   const isStudent = user?.role === "student";
   const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
   
@@ -82,14 +129,7 @@ const Profile: React.FC = () => {
               <CardDescription className={isStudent ? "text-gray-300" : ""}>Esta é sua imagem atual</CardDescription>
             </CardHeader>
             <CardContent className="flex flex-col items-center gap-4">
-              <Avatar className="h-32 w-32">
-                <AvatarImage src={user?.avatar} alt={user?.name} />
-                <AvatarFallback className="text-2xl">{user?.name?.substring(0, 2).toUpperCase()}</AvatarFallback>
-              </Avatar>
-              <Button variant="outline" onClick={handleChangePhoto} className={isStudent ? "bg-custom-red text-white hover:bg-custom-red/80 border-none" : ""}>
-                <Camera className="h-4 w-4 mr-2" />
-                Alterar foto
-              </Button>
+              <PhotoUploader />
             </CardContent>
           </Card>
           
@@ -106,103 +146,139 @@ const Profile: React.FC = () => {
                 </TabsList>
                 
                 <TabsContent value="profile">
-                  <form onSubmit={handleProfileSubmit} className="space-y-4 mt-4">
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="name">Nome completo</Label>
-                        <Input 
-                          id="name"
+                  <Form {...profileForm}>
+                    <form onSubmit={profileForm.handleSubmit(handleProfileSubmit)} className="space-y-4 mt-4">
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                          control={profileForm.control}
                           name="name"
-                          value={formData.name}
-                          onChange={handleFormChange}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Nome completo</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
-                      </div>
-                      
-                      <div className="space-y-2">
-                        <Label htmlFor="email">Email</Label>
-                        <Input 
-                          id="email"
+                        
+                        <FormField
+                          control={profileForm.control}
                           name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleFormChange}
-                        />
-                      </div>
-                    </div>
-                    
-                    <div className="grid gap-4 md:grid-cols-2">
-                      <div className="space-y-2">
-                        <Label htmlFor="phone">Telefone</Label>
-                        <Input 
-                          id="phone"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleFormChange}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Email</FormLabel>
+                              <FormControl>
+                                <Input {...field} readOnly />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                       </div>
                       
-                      <div className="space-y-2">
-                        <Label htmlFor="address">Endereço</Label>
-                        <Input 
-                          id="address"
+                      <div className="grid gap-4 md:grid-cols-2">
+                        <FormField
+                          control={profileForm.control}
+                          name="phone"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Telefone</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        
+                        <FormField
+                          control={profileForm.control}
                           name="address"
-                          value={formData.address}
-                          onChange={handleFormChange}
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Endereço</FormLabel>
+                              <FormControl>
+                                <Input {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
                         />
                       </div>
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <Button type="submit" className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}>
-                        <Save className="h-4 w-4 mr-2" />
-                        Salvar alterações
-                      </Button>
-                    </div>
-                  </form>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          type="submit" 
+                          className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
+                          isLoading={isSavingProfile}
+                        >
+                          <Save className="h-4 w-4 mr-2" />
+                          Salvar alterações
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
                 </TabsContent>
                 
                 <TabsContent value="password">
-                  <form onSubmit={handlePasswordSubmit} className="space-y-4 mt-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="currentPassword">Senha atual</Label>
-                      <Input 
-                        id="currentPassword"
+                  <Form {...passwordForm}>
+                    <form onSubmit={passwordForm.handleSubmit(handlePasswordSubmit)} className="space-y-4 mt-4">
+                      <FormField
+                        control={passwordForm.control}
                         name="currentPassword"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={handlePasswordChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Senha atual</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="newPassword">Nova senha</Label>
-                      <Input 
-                        id="newPassword"
+                      
+                      <FormField
+                        control={passwordForm.control}
                         name="newPassword"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={handlePasswordChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nova senha</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">Confirme a nova senha</Label>
-                      <Input 
-                        id="confirmPassword"
+                      
+                      <FormField
+                        control={passwordForm.control}
                         name="confirmPassword"
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={handlePasswordChange}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Confirme a nova senha</FormLabel>
+                            <FormControl>
+                              <Input type="password" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
                       />
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <Button type="submit" className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}>
-                        <Lock className="h-4 w-4 mr-2" />
-                        Atualizar senha
-                      </Button>
-                    </div>
-                  </form>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          type="submit" 
+                          className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
+                          isLoading={isSavingPassword}
+                        >
+                          <Lock className="h-4 w-4 mr-2" />
+                          Atualizar senha
+                        </Button>
+                      </div>
+                    </form>
+                  </Form>
                 </TabsContent>
               </Tabs>
             </CardContent>

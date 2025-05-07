@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   CalendarDays,
   Clock,
@@ -29,13 +29,16 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { AttendanceConfirmation } from "@/components/dashboard/student/AttendanceConfirmation";
+import { ScheduleManager } from "@/components/training/ScheduleManager";
+import { supabase } from "@/integrations/supabase/client";
 
 const Training = () => {
   const { user } = useAuth();
   const isStudent = user?.role === "student";
   const cardClasses = isStudent ? "bg-black/40 text-white border-gray-700" : "";
   
-  // Mock data for student training schedule
+  // State for student training schedule
   const [studentSchedule, setStudentSchedule] = useState([
     { id: "1", day: "Segunda", time: "18:00 - 19:30" },
     { id: "2", day: "Quarta", time: "18:00 - 19:30" },
@@ -63,6 +66,17 @@ const Training = () => {
     { id: "10", day: "Quarta", time: "18:00 - 19:30", availability: "low" },
   ];
 
+  // Format today's date for display
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('pt-BR', { 
+    day: '2-digit', 
+    month: '2-digit',
+    year: 'numeric' 
+  });
+  
+  const dayOfWeek = today.toLocaleDateString('pt-BR', { weekday: 'long' });
+  const capitalizedDayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "present":
@@ -72,46 +86,6 @@ const Training = () => {
       default:
         return <Badge>Desconhecido</Badge>;
     }
-  };
-
-  const getAvailabilityBadge = (availability: string) => {
-    switch (availability) {
-      case "high":
-        return <Badge className="bg-green-500">Disponível</Badge>;
-      case "medium":
-        return <Badge className="bg-amber-500">Médio</Badge>;
-      case "low":
-        return <Badge className="bg-red-500">Quase Cheio</Badge>;
-      default:
-        return <Badge>Desconhecido</Badge>;
-    }
-  };
-
-  const handleConfirmPresence = () => {
-    toast.success("Presença confirmada com sucesso!");
-  };
-
-  const handleAddSchedule = (slot: { id: string, day: string, time: string }) => {
-    const exists = studentSchedule.some(schedule => schedule.id === slot.id);
-    if (exists) {
-      toast.error("Horário já adicionado!");
-      return;
-    }
-    setStudentSchedule(prev => [...prev, { id: slot.id, day: slot.day, time: slot.time }]);
-    toast.success("Horário adicionado com sucesso!");
-  };
-
-  const handleRemoveSchedule = (id: string) => {
-    setStudentSchedule(prev => prev.filter(schedule => schedule.id !== id));
-    toast.success("Horário removido com sucesso!");
-  };
-
-  const handleSaveChanges = () => {
-    toast.success("Alterações salvas com sucesso!");
-  };
-
-  const handleChangeSchedule = () => {
-    toast.success("Função alteração de horário ativada!");
   };
 
   const handleViewFullHistory = () => {
@@ -142,8 +116,8 @@ const Training = () => {
                   <Calendar className="h-6 w-6 text-custom-red" />
                 </div>
                 <div>
-                  <p className="font-medium text-lg">Segunda-feira</p>
-                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>15 de março de 2024</p>
+                  <p className="font-medium text-lg">{capitalizedDayOfWeek}</p>
+                  <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>{formattedDate}</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -155,14 +129,7 @@ const Training = () => {
                   <p className={isStudent ? "text-gray-300" : "text-muted-foreground"}>Duração: 1h30min</p>
                 </div>
               </div>
-              <Button 
-                size="lg" 
-                onClick={handleConfirmPresence}
-                className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
-              >
-                <CheckCircle2 className="mr-2 h-4 w-4" />
-                Confirmar Presença
-              </Button>
+              <AttendanceConfirmation date={formattedDate} time="18:00 - 19:30" />
             </div>
           </CardContent>
         </Card>
@@ -203,8 +170,8 @@ const Training = () => {
               <CardFooter>
                 <Button 
                   variant="outline" 
-                  onClick={handleChangeSchedule}
-                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
+                  onClick={() => document.getElementById("tab-change")?.click()}
+                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80 text-white" : "w-full"}
                 >
                   <CalendarClock className="mr-2 h-4 w-4" />
                   Alterar Horários
@@ -264,7 +231,7 @@ const Training = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="change">
+          <TabsContent value="change" id="tab-change">
             <Card className={cardClasses}>
               <CardHeader>
                 <CardTitle>Alterar Horários</CardTitle>
@@ -273,66 +240,12 @@ const Training = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  <p className="font-medium">Horários Atuais</p>
-                  <div className="grid gap-2">
-                    {studentSchedule.map((schedule) => (
-                      <div key={schedule.id} className="flex justify-between items-center border-b pb-2">
-                        <div className="flex items-center">
-                          <CalendarDays className="h-5 w-5 mr-2 text-muted-foreground" />
-                          <span>{schedule.day} • {schedule.time}</span>
-                        </div>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          onClick={() => handleRemoveSchedule(schedule.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-2" />
-                          Remover
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div className="mt-6">
-                    <p className="font-medium">Horários Disponíveis</p>
-                    <p className={isStudent ? "text-sm text-gray-300 mb-4" : "text-sm text-muted-foreground mb-4"}>
-                      Selecione horários adicionais para seu treino.
-                    </p>
-                    
-                    <div className="grid gap-2">
-                      {availableSlots.map((slot) => (
-                        <div key={slot.id} className="flex justify-between items-center border-b pb-2">
-                          <div className="flex items-center">
-                            <CalendarDays className="h-5 w-5 mr-2 text-muted-foreground" />
-                            <span>{slot.day} • {slot.time}</span>
-                          </div>
-                          <div className="flex items-center space-x-2">
-                            {getAvailabilityBadge(slot.availability)}
-                            <Button 
-                              size="sm"
-                              onClick={() => handleAddSchedule(slot)}
-                              className={isStudent ? "bg-custom-red hover:bg-custom-red/80" : ""}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Adicionar
-                            </Button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                <ScheduleManager 
+                  studentSchedule={studentSchedule}
+                  availableSlots={availableSlots}
+                  onScheduleChange={setStudentSchedule}
+                />
               </CardContent>
-              <CardFooter>
-                <Button 
-                  onClick={handleSaveChanges}
-                  className={isStudent ? "w-full bg-custom-red hover:bg-custom-red/80" : "w-full"}
-                >
-                  <Save className="mr-2 h-4 w-4" />
-                  Salvar Alterações
-                </Button>
-              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>

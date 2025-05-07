@@ -1,3 +1,4 @@
+
 import React from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,17 @@ import { toast } from "sonner";
 import { createClient } from '@supabase/supabase-js';
 import { MembershipCard } from "./student/MembershipCard";
 import { ScheduleCard } from "./student/ScheduleCard";
+import { AttendanceConfirmation } from "./student/AttendanceConfirmation";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const StudentDashboard: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   
   // Mock data for student
   const studentData = {
-    name: "João Silva",
+    name: user?.name || "Aluno",
     membership: {
       plan: "Plano Trimestral",
       startDate: "15/01/2024",
@@ -38,33 +43,16 @@ const StudentDashboard: React.FC = () => {
     ]
   };
 
-  const handleConfirmAttendance = async () => {
-    try {
-      // Initialize Supabase client
-      const supabase = createClient(
-        import.meta.env.VITE_SUPABASE_URL || '', 
-        import.meta.env.VITE_SUPABASE_ANON_KEY || ''
-      );
-
-      // Insert attendance record
-      const { error } = await supabase
-        .from('attendances')
-        .insert([
-          { 
-            student_id: 'user123', // Replace with actual user ID
-            date: new Date().toISOString(),
-            status: 'present'
-          }
-        ]);
-
-      if (error) throw error;
-
-      toast.success("Presença confirmada com sucesso!");
-    } catch (error) {
-      console.error("Erro ao confirmar presença:", error);
-      toast.error("Erro ao confirmar presença. Tente novamente.");
-    }
-  };
+  // Format today's date for display
+  const today = new Date();
+  const formattedDate = today.toLocaleDateString('pt-BR', { 
+    day: '2-digit', 
+    month: '2-digit',
+    year: 'numeric' 
+  });
+  
+  const dayOfWeek = today.toLocaleDateString('pt-BR', { weekday: 'long' });
+  const capitalizedDayOfWeek = dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1);
 
   return (
     <div className="bg-gradient-black-red min-h-screen -m-6 p-6">
@@ -127,8 +115,8 @@ const StudentDashboard: React.FC = () => {
                   <Calendar className="h-6 w-6 text-custom-red" />
                 </div>
                 <div>
-                  <p className="font-medium text-lg">Segunda-feira</p>
-                  <p className="text-gray-300">15 de março de 2024</p>
+                  <p className="font-medium text-lg">{capitalizedDayOfWeek}</p>
+                  <p className="text-gray-300">{formattedDate}</p>
                 </div>
               </div>
               <div className="flex items-center">
@@ -140,13 +128,7 @@ const StudentDashboard: React.FC = () => {
                   <p className="text-gray-300">Duração: 1h30min</p>
                 </div>
               </div>
-              <Button 
-                size="lg" 
-                onClick={handleConfirmAttendance}
-                className="bg-custom-red hover:bg-custom-red/80"
-              >
-                Confirmar Presença
-              </Button>
+              <AttendanceConfirmation date={formattedDate} time="18:00 - 19:30" />
             </div>
           </CardContent>
         </Card>
